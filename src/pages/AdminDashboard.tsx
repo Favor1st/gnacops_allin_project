@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -19,7 +18,12 @@ import {
   Plus,
   Download,
   Search,
-  Filter
+  Filter,
+  Store,
+  Package,
+  ShoppingCart,
+  Star,
+  AlertTriangle
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
@@ -37,7 +41,13 @@ const AdminDashboard = () => {
     approvedToday: 12,
     rejectedToday: 3,
     totalRevenue: 249400,
-    pendingPayments: 45
+    pendingPayments: 45,
+    // Marketplace stats
+    totalVendors: 89,
+    pendingVendors: 12,
+    totalProducts: 2341,
+    pendingProducts: 34,
+    marketplaceRevenue: 156789
   };
 
   const recentSubmissions = [
@@ -75,6 +85,46 @@ const AdminDashboard = () => {
     }
   ];
 
+  const pendingVendors = [
+    {
+      id: "VEN-2024-001",
+      businessName: "Smart Learning Solutions",
+      contactPerson: "Kwame Osei",
+      email: "kwame@smartlearning.gh",
+      submittedAt: "2024-01-25 16:30",
+      status: "pending"
+    },
+    {
+      id: "VEN-2024-002",
+      businessName: "Educational Supplies Co",
+      contactPerson: "Akosua Mensah",
+      email: "akosua@edusupplies.com",
+      submittedAt: "2024-01-25 14:15",
+      status: "under_review"
+    }
+  ];
+
+  const pendingProducts = [
+    {
+      id: "PRD-001",
+      name: "Advanced Chemistry Lab Kit",
+      vendor: "Science Supply Co",
+      price: 450.00,
+      category: "Laboratory Equipment",
+      submittedAt: "2024-01-25 15:20",
+      status: "pending"
+    },
+    {
+      id: "PRD-002",
+      name: "Interactive Mathematics Software",
+      vendor: "EduTech Solutions",
+      price: 89.99,
+      category: "Software",
+      submittedAt: "2024-01-25 12:45",
+      status: "under_review"
+    }
+  ];
+
   const handleApprove = (id: string) => {
     toast({
       title: "Member Approved",
@@ -90,6 +140,20 @@ const AdminDashboard = () => {
     });
   };
 
+  const handleApproveVendor = (id: string) => {
+    toast({
+      title: "Vendor Approved",
+      description: `Vendor application ${id} has been approved.`,
+    });
+  };
+
+  const handleApproveProduct = (id: string) => {
+    toast({
+      title: "Product Approved",
+      description: `Product ${id} has been approved and is now live.`,
+    });
+  };
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "approved":
@@ -98,6 +162,8 @@ const AdminDashboard = () => {
         return <Badge className="bg-ghana-gold text-black">Pending</Badge>;
       case "rejected":
         return <Badge variant="destructive">Rejected</Badge>;
+      case "under_review":
+        return <Badge className="bg-blue-500 text-white">Under Review</Badge>;
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
@@ -146,11 +212,11 @@ const AdminDashboard = () => {
         {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground">Manage GNACOPS memberships and platform settings.</p>
+          <p className="text-muted-foreground">Manage GNACOPS memberships, marketplace, and platform settings.</p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+        {/* Enhanced Stats Cards */}
+        <div className="grid md:grid-cols-3 lg:grid-cols-8 gap-4 mb-8">
           <Card className="gradient-card border-2 border-ghana-gold/20">
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium">Total Members</CardTitle>
@@ -189,30 +255,50 @@ const AdminDashboard = () => {
 
           <Card className="gradient-card border-2 border-ghana-gold/20">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+              <CardTitle className="text-sm font-medium">Total Vendors</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">GHS {stats.totalRevenue.toLocaleString()}</div>
+              <div className="text-2xl font-bold">{stats.totalVendors}</div>
             </CardContent>
           </Card>
 
           <Card className="gradient-card border-2 border-ghana-gold/20">
             <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
+              <CardTitle className="text-sm font-medium">Pending Vendors</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-ghana-gold">{stats.pendingPayments}</div>
+              <div className="text-2xl font-bold text-ghana-gold">{stats.pendingVendors}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="gradient-card border-2 border-ghana-gold/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Total Products</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalProducts.toLocaleString()}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="gradient-card border-2 border-ghana-green/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Marketplace Revenue</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">GHS {stats.marketplaceRevenue.toLocaleString()}</div>
             </CardContent>
           </Card>
         </div>
 
         {/* Main Content */}
         <Tabs defaultValue="members" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="members">Member Management</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-6">
+            <TabsTrigger value="members">Members</TabsTrigger>
+            <TabsTrigger value="marketplace">Marketplace</TabsTrigger>
             <TabsTrigger value="forms">Form Builder</TabsTrigger>
             <TabsTrigger value="certificates">Certificates</TabsTrigger>
             <TabsTrigger value="workers">Workers</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
           </TabsList>
 
           {/* Member Management Tab */}
@@ -299,6 +385,135 @@ const AdminDashboard = () => {
                       </div>
                     </div>
                   ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Marketplace Management Tab */}
+          <TabsContent value="marketplace" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-6">
+              {/* Vendor Management */}
+              <Card className="gradient-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Store className="w-5 h-5 mr-2" />
+                    Vendor Management
+                  </CardTitle>
+                  <CardDescription>Review and manage vendor applications</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {pendingVendors.map((vendor) => (
+                      <div key={vendor.id} className="p-4 border rounded-lg space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold">{vendor.businessName}</h4>
+                            <p className="text-sm text-muted-foreground">{vendor.contactPerson}</p>
+                            <p className="text-xs text-muted-foreground">{vendor.email}</p>
+                          </div>
+                          {getStatusBadge(vendor.status)}
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button variant="outline" size="sm">
+                            <Eye className="w-4 h-4 mr-2" />
+                            View
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            className="bg-ghana-green hover:bg-ghana-green/90 text-white"
+                            onClick={() => handleApproveVendor(vendor.id)}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Approve
+                          </Button>
+                          <Button variant="destructive" size="sm">
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Reject
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Product Management */}
+              <Card className="gradient-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center">
+                    <Package className="w-5 h-5 mr-2" />
+                    Product Moderation
+                  </CardTitle>
+                  <CardDescription>Review and approve new products</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {pendingProducts.map((product) => (
+                      <div key={product.id} className="p-4 border rounded-lg space-y-3">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h4 className="font-semibold">{product.name}</h4>
+                            <p className="text-sm text-muted-foreground">{product.vendor}</p>
+                            <div className="flex items-center space-x-2 mt-1">
+                              <span className="text-lg font-bold text-ghana-green">GHS {product.price}</span>
+                              <Badge variant="outline">{product.category}</Badge>
+                            </div>
+                          </div>
+                          {getStatusBadge(product.status)}
+                        </div>
+                        <div className="flex space-x-2">
+                          <Button variant="outline" size="sm">
+                            <Eye className="w-4 h-4 mr-2" />
+                            View
+                          </Button>
+                          <Button 
+                            size="sm" 
+                            className="bg-ghana-green hover:bg-ghana-green/90 text-white"
+                            onClick={() => handleApproveProduct(product.id)}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Approve
+                          </Button>
+                          <Button variant="destructive" size="sm">
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Reject
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Marketplace Analytics */}
+            <Card className="gradient-card">
+              <CardHeader>
+                <CardTitle className="flex items-center">
+                  <ShoppingCart className="w-5 h-5 mr-2" />
+                  Marketplace Analytics
+                </CardTitle>
+                <CardDescription>Track marketplace performance and metrics</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-4 gap-4">
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold text-ghana-green">{stats.totalProducts.toLocaleString()}</div>
+                    <p className="text-sm text-muted-foreground">Total Products</p>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold text-ghana-gold">{stats.pendingProducts}</div>
+                    <p className="text-sm text-muted-foreground">Pending Review</p>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold text-ghana-green">GHS {stats.marketplaceRevenue.toLocaleString()}</div>
+                    <p className="text-sm text-muted-foreground">Total Revenue</p>
+                  </div>
+                  <div className="text-center p-4 border rounded-lg">
+                    <div className="text-2xl font-bold">4.8</div>
+                    <p className="text-sm text-muted-foreground">Avg. Rating</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -393,12 +608,95 @@ const AdminDashboard = () => {
                   <div className="flex items-center justify-between p-4 border rounded-lg">
                     <div>
                       <h4 className="font-semibold">Admin Users</h4>
-                      <p className="text-sm text-muted-foreground">3 active admin users</p>
+                      <p className="text-sm text-muted-foreground">5 active admin users with various permissions</p>
                     </div>
                     <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black">
                       <Plus className="w-4 h-4 mr-2" />
                       Add Worker
                     </Button>
+                  </div>
+                  
+                  <div className="space-y-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">John Admin</h5>
+                          <p className="text-sm text-muted-foreground">Super Admin • All Permissions</p>
+                        </div>
+                        <Badge className="bg-ghana-green text-white">Active</Badge>
+                      </div>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Mary Support</h5>
+                          <p className="text-sm text-muted-foreground">Support Staff • Membership Only</p>
+                        </div>
+                        <Badge className="bg-ghana-green text-white">Active</Badge>
+                      </div>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h5 className="font-medium">Peter Marketplace</h5>
+                          <p className="text-sm text-muted-foreground">Marketplace Manager • Vendor & Product Review</p>
+                        </div>
+                        <Badge className="bg-ghana-green text-white">Active</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <Card className="gradient-card">
+              <CardHeader>
+                <CardTitle>Platform Settings</CardTitle>
+                <CardDescription>Configure system-wide settings and preferences</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">General Settings</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <h4 className="font-medium">Membership Auto-Approval</h4>
+                          <p className="text-sm text-muted-foreground">Automatically approve certain membership types</p>
+                        </div>
+                        <Button variant="outline" size="sm">Configure</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <h4 className="font-medium">Email Notifications</h4>
+                          <p className="text-sm text-muted-foreground">Manage email notification settings</p>
+                        </div>
+                        <Button variant="outline" size="sm">Configure</Button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Marketplace Settings</h3>
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <h4 className="font-medium">Vendor Commission Rate</h4>
+                          <p className="text-sm text-muted-foreground">Set commission percentage for marketplace sales</p>
+                        </div>
+                        <Button variant="outline" size="sm">Configure</Button>
+                      </div>
+                      <div className="flex items-center justify-between p-3 border rounded-lg">
+                        <div>
+                          <h4 className="font-medium">Product Categories</h4>
+                          <p className="text-sm text-muted-foreground">Manage marketplace product categories</p>
+                        </div>
+                        <Button variant="outline" size="sm">Configure</Button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </CardContent>
