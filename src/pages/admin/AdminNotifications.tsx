@@ -1,10 +1,9 @@
-
 import { AdminLayout } from "@/components/AdminLayout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bell, Send, Settings, Eye, Trash2, Plus } from "lucide-react";
+import { Bell, Send, Settings, Eye, Trash2, Plus, Edit } from "lucide-react";
 import { useState } from "react";
 
 const AdminNotifications = () => {
