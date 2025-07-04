@@ -11,6 +11,8 @@ import VendorDashboard from "./pages/VendorDashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
 import Marketplace from "./pages/Marketplace";
+import ProductDetail from "./pages/ProductDetail";
+import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 
 // New Admin Pages
@@ -54,6 +56,8 @@ function App() {
             <Route path="/admin/support" element={<AdminSupport />} />
             <Route path="/registration-success" element={<RegistrationSuccess />} />
             <Route path="/marketplace" element={<Marketplace />} />
+            <Route path="/product/:id" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <Toaster />
