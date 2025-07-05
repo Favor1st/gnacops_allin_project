@@ -15,10 +15,12 @@ import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
 import NotFound from "./pages/NotFound";
 
-// New Admin Pages
+// Admin Pages
 import AdminMembers from "./pages/admin/AdminMembers";
 import AdminMarketplace from "./pages/admin/AdminMarketplace";
 import AdminProducts from "./pages/admin/AdminProducts";
+import AdminOrders from "./pages/admin/AdminOrders";
+import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import AdminForms from "./pages/admin/AdminForms";
 import AdminCertificates from "./pages/admin/AdminCertificates";
@@ -42,10 +44,14 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/vendor-login" element={<VendorLogin />} />
             <Route path="/vendor-dashboard" element={<VendorDashboard />} />
+            
+            {/* Admin Routes */}
             <Route path="/admin" element={<AdminDashboard />} />
             <Route path="/admin/members" element={<AdminMembers />} />
             <Route path="/admin/marketplace" element={<AdminMarketplace />} />
             <Route path="/admin/products" element={<AdminProducts />} />
+            <Route path="/admin/orders" element={<AdminOrders />} />
+            <Route path="/admin/users" element={<AdminUsers />} />
             <Route path="/admin/analytics" element={<AdminAnalytics />} />
             <Route path="/admin/forms" element={<AdminForms />} />
             <Route path="/admin/certificates" element={<AdminCertificates />} />
@@ -54,6 +60,8 @@ function App() {
             <Route path="/admin/settings" element={<AdminSettings />} />
             <Route path="/admin/security" element={<AdminSecurity />} />
             <Route path="/admin/support" element={<AdminSupport />} />
+            
+            {/* Public Routes */}
             <Route path="/registration-success" element={<RegistrationSuccess />} />
             <Route path="/marketplace" element={<Marketplace />} />
             <Route path="/product/:id" element={<ProductDetail />} />
