@@ -10,9 +10,6 @@ import Register from "./pages/Register";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
 import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
-import Marketplace from "./pages/Marketplace";
-import VendorDashboard from "./pages/VendorDashboard";
-import VendorLogin from "./pages/VendorLogin";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,9 +27,6 @@ const App = () => (
           <Route path="/registration-success" element={<RegistrationSuccess />} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/marketplace" element={<Marketplace />} />
-          <Route path="/vendor" element={<VendorDashboard />} />
-          <Route path="/vendor/login" element={<VendorLogin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

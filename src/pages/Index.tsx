@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,8 +15,7 @@ import {
   ArrowRight,
   Star,
   Menu,
-  X,
-  ShoppingCart
+  X
 } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -28,37 +28,43 @@ const Index = () => {
       description: "For private schools and educational institutions seeking professional recognition and support.",
       features: ["Official recognition", "Networking opportunities", "Professional development", "Policy advocacy"],
       price: "Contact for pricing",
-      popular: true
+      popular: true,
+      slug: "institutional"
     },
     {
       title: "Teacher Council",
       description: "Professional membership for teachers in private schools to enhance their career development.",
       features: ["Teaching resources", "Professional certification", "Career advancement", "Peer networking"],
-      price: "GHS 120/year"
+      price: "GHS 120/year",
+      slug: "teacher"
     },
     {
       title: "Parent Council", 
       description: "Membership for parents to actively participate in their children's educational journey.",
       features: ["School governance participation", "Educational workshops", "Parent networking", "Child advocacy"],
-      price: "GHS 80/year"
+      price: "GHS 80/year",
+      slug: "parent"
     },
     {
       title: "Proprietor",
       description: "For school owners and proprietors to connect, learn, and grow their educational enterprises.",
       features: ["Business networking", "Regulatory support", "Best practices sharing", "Growth opportunities"],
-      price: "GHS 200/year"
+      price: "GHS 200/year",
+      slug: "proprietor"
     },
     {
       title: "Service Providers",
       description: "For businesses providing services to schools - suppliers, consultants, and service companies.",
       features: ["Business opportunities", "Network access", "Service promotion", "Partnership opportunities"],
-      price: "GHS 150/year"
+      price: "GHS 150/year",
+      slug: "service-provider"
     },
     {
       title: "Non-Teaching Staff",
       description: "Professional development and recognition for support staff in educational institutions.",
       features: ["Skills development", "Professional recognition", "Career opportunities", "Staff networking"],
-      price: "GHS 60/year"
+      price: "GHS 60/year",
+      slug: "non-teaching"
     }
   ];
 
@@ -82,10 +88,6 @@ const Index = () => {
             <div className="hidden md:flex items-center space-x-6">
               <a href="#about" className="text-foreground hover:text-ghana-gold transition-colors">About</a>
               <a href="#membership" className="text-foreground hover:text-ghana-gold transition-colors">Membership</a>
-              <Link to="/marketplace" className="text-foreground hover:text-ghana-gold transition-colors flex items-center">
-                <ShoppingCart className="w-4 h-4 mr-1" />
-                Marketplace
-              </Link>
               <a href="#contact" className="text-foreground hover:text-ghana-gold transition-colors">Contact</a>
               <Link to="/login">
                 <Button variant="outline">Login</Button>
@@ -110,10 +112,6 @@ const Index = () => {
               <div className="px-4 py-4 space-y-3">
                 <a href="#about" className="block text-foreground hover:text-ghana-gold transition-colors">About</a>
                 <a href="#membership" className="block text-foreground hover:text-ghana-gold transition-colors">Membership</a>
-                <Link to="/marketplace" className="block text-foreground hover:text-ghana-gold transition-colors flex items-center">
-                  <ShoppingCart className="w-4 h-4 mr-1" />
-                  Marketplace
-                </Link>
                 <a href="#contact" className="block text-foreground hover:text-ghana-gold transition-colors">Contact</a>
                 <Link to="/login" className="block">
                   <Button variant="outline" className="w-full">Login</Button>
@@ -139,10 +137,7 @@ const Index = () => {
                 <a href="#membership">Explore Membership</a>
               </Button>
               <Button size="lg" variant="outline" className="text-lg px-8 py-3">
-                <Link to="/marketplace" className="flex items-center">
-                  <ShoppingCart className="w-5 h-5 mr-2" />
-                  Visit Marketplace
-                </Link>
+                <a href="#about">Learn More</a>
               </Button>
             </div>
           </div>
@@ -225,7 +220,7 @@ const Index = () => {
                       </li>
                     ))}
                   </ul>
-                  <Link to={`/register/${membership.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                  <Link to={`/register/${membership.slug}`}>
                     <Button className="w-full bg-ghana-gold hover:bg-ghana-gold/90 text-black">
                       Apply Now
                       <ArrowRight className="w-4 h-4 ml-2" />
@@ -382,7 +377,6 @@ const Index = () => {
               <ul className="space-y-2 text-white/80">
                 <li><a href="#about" className="hover:text-white transition-colors">About</a></li>
                 <li><a href="#membership" className="hover:text-white transition-colors">Membership</a></li>
-                <li><Link to="/marketplace" className="hover:text-white transition-colors">Marketplace</Link></li>
                 <li><a href="#contact" className="hover:text-white transition-colors">Contact</a></li>
               </ul>
             </div>
@@ -391,8 +385,8 @@ const Index = () => {
               <h4 className="font-semibold mb-4">Membership</h4>
               <ul className="space-y-2 text-white/80">
                 <li><Link to="/register/institutional" className="hover:text-white transition-colors">Institutional</Link></li>
-                <li><Link to="/register/teacher-council" className="hover:text-white transition-colors">Teacher Council</Link></li>
-                <li><Link to="/register/parent-council" className="hover:text-white transition-colors">Parent Council</Link></li>
+                <li><Link to="/register/teacher" className="hover:text-white transition-colors">Teacher Council</Link></li>
+                <li><Link to="/register/parent" className="hover:text-white transition-colors">Parent Council</Link></li>
                 <li><Link to="/register/proprietor" className="hover:text-white transition-colors">Proprietor</Link></li>
               </ul>
             </div>
