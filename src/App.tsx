@@ -1,78 +1,38 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import VendorLogin from "./pages/VendorLogin";
-import VendorDashboard from "./pages/VendorDashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
-import Marketplace from "./pages/Marketplace";
-import ProductDetail from "./pages/ProductDetail";
-import Cart from "./pages/Cart";
+import Dashboard from "./pages/Dashboard";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
-
-// Admin Pages
-import AdminMembers from "./pages/admin/AdminMembers";
-import AdminMarketplace from "./pages/admin/AdminMarketplace";
-import AdminProducts from "./pages/admin/AdminProducts";
-import AdminOrders from "./pages/admin/AdminOrders";
-import AdminUsers from "./pages/admin/AdminUsers";
-import AdminAnalytics from "./pages/admin/AdminAnalytics";
-import AdminForms from "./pages/admin/AdminForms";
-import AdminCertificates from "./pages/admin/AdminCertificates";
-import AdminWorkers from "./pages/admin/AdminWorkers";
-import AdminNotifications from "./pages/admin/AdminNotifications";
-import AdminSettings from "./pages/admin/AdminSettings";
-import AdminSecurity from "./pages/admin/AdminSecurity";
-import AdminSupport from "./pages/admin/AdminSupport";
 
 const queryClient = new QueryClient();
 
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <Router>
-        <div className="min-h-screen bg-background">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/vendor-login" element={<VendorLogin />} />
-            <Route path="/vendor-dashboard" element={<VendorDashboard />} />
-            
-            {/* Admin Routes */}
-            <Route path="/admin" element={<AdminDashboard />} />
-            <Route path="/admin/members" element={<AdminMembers />} />
-            <Route path="/admin/marketplace" element={<AdminMarketplace />} />
-            <Route path="/admin/products" element={<AdminProducts />} />
-            <Route path="/admin/orders" element={<AdminOrders />} />
-            <Route path="/admin/users" element={<AdminUsers />} />
-            <Route path="/admin/analytics" element={<AdminAnalytics />} />
-            <Route path="/admin/forms" element={<AdminForms />} />
-            <Route path="/admin/certificates" element={<AdminCertificates />} />
-            <Route path="/admin/workers" element={<AdminWorkers />} />
-            <Route path="/admin/notifications" element={<AdminNotifications />} />
-            <Route path="/admin/settings" element={<AdminSettings />} />
-            <Route path="/admin/security" element={<AdminSecurity />} />
-            <Route path="/admin/support" element={<AdminSupport />} />
-            
-            {/* Public Routes */}
-            <Route path="/registration-success" element={<RegistrationSuccess />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-          <Toaster />
-        </div>
-      </Router>
-    </QueryClientProvider>
-  );
-}
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register/:type" element={<Register />} />
+          <Route path="/registration-success" element={<RegistrationSuccess />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin" element={<AdminDashboard />} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </TooltipProvider>
+  </QueryClientProvider>
+);
 
 export default App;

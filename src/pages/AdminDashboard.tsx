@@ -1,365 +1,412 @@
 
-import { AdminLayout } from "@/components/AdminLayout";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
+  GraduationCap, 
   Users, 
   FileText, 
+  Settings, 
+  LogOut,
   CheckCircle,
   Clock,
   XCircle,
   Eye,
   Edit,
+  Trash2,
   Plus,
   Download,
-  Store,
-  Package,
-  ShoppingCart,
-  Star,
-  TrendingUp,
-  DollarSign,
-  Activity,
-  AlertTriangle,
+  Search,
+  Filter
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 const AdminDashboard = () => {
-  
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
+
+  // Mock data
   const stats = {
     totalMembers: 1247,
     pendingApprovals: 23,
     approvedToday: 12,
     rejectedToday: 3,
     totalRevenue: 249400,
-    pendingPayments: 45,
-    totalVendors: 89,
-    pendingVendors: 12,
-    totalProducts: 2341,
-    pendingProducts: 34,
-    marketplaceRevenue: 156789,
-    totalOrders: 5632,
-    pendingOrders: 78,
-    totalUsers: 3421,
-    activeUsers: 892
+    pendingPayments: 45
   };
 
-  const recentActivities = [
+  const recentSubmissions = [
     {
-      id: "ACT-001",
-      type: "member_approval",
-      description: "New member application approved",
-      user: "Dr. Kwame Asante",
-      timestamp: "5 min ago",
-      status: "success"
+      id: "REG-2024-001",
+      name: "Dr. Kwame Asante",
+      type: "Teacher Council",
+      submittedAt: "2024-01-25 14:30",
+      status: "pending",
+      region: "Greater Accra"
     },
     {
-      id: "ACT-002",
-      type: "order_placed",
-      description: "Large order placed by Accra Private School",
-      amount: "GHS 2,450",
-      timestamp: "12 min ago",
-      status: "info"
+      id: "REG-2024-002", 
+      name: "Mary Adjei",
+      type: "Parent Council",
+      submittedAt: "2024-01-25 13:15",
+      status: "approved",
+      region: "Ashanti"
     },
     {
-      id: "ACT-003",
-      type: "vendor_pending",
-      description: "New vendor application requires review",
-      user: "Smart Learning Solutions",
-      timestamp: "25 min ago",
-      status: "warning"
+      id: "REG-2024-003",
+      name: "Accra Private Academy",
+      type: "Institutional",
+      submittedAt: "2024-01-25 11:45",
+      status: "pending",
+      region: "Greater Accra"
     },
     {
-      id: "ACT-004",
-      type: "payment_processed",
-      description: "Vendor payment processed successfully",
-      amount: "GHS 5,230",
-      timestamp: "1 hour ago",
-      status: "success"
+      id: "REG-2024-004",
+      name: "John Mensah",
+      type: "Proprietor",
+      submittedAt: "2024-01-25 10:20",
+      status: "rejected",
+      region: "Central"
     }
   ];
 
-  const handleQuickAction = (action: string) => {
+  const handleApprove = (id: string) => {
     toast({
-      title: "Quick Action",
-      description: `${action} initiated successfully.`,
+      title: "Member Approved",
+      description: `Application ${id} has been approved and certificate will be generated.`,
     });
   };
 
-  const getActivityIcon = (type: string) => {
-    switch (type) {
-      case "member_approval": return <CheckCircle className="w-4 h-4 text-ghana-green" />;
-      case "order_placed": return <ShoppingCart className="w-4 h-4 text-blue-500" />;
-      case "vendor_pending": return <Store className="w-4 h-4 text-ghana-gold" />;
-      case "payment_processed": return <DollarSign className="w-4 h-4 text-ghana-green" />;
-      default: return <Activity className="w-4 h-4" />;
-    }
+  const handleReject = (id: string) => {
+    toast({
+      title: "Member Rejected",
+      description: `Application ${id} has been rejected.`,
+      variant: "destructive",
+    });
   };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "success": return <Badge className="bg-ghana-green text-white">Success</Badge>;
-      case "warning": return <Badge className="bg-ghana-gold text-black">Warning</Badge>;
-      case "info": return <Badge className="bg-blue-500 text-white">Info</Badge>;
-      default: return <Badge variant="secondary">Unknown</Badge>;
+      case "approved":
+        return <Badge className="bg-ghana-green text-white">Approved</Badge>;
+      case "pending":
+        return <Badge className="bg-ghana-gold text-black">Pending</Badge>;
+      case "rejected":
+        return <Badge variant="destructive">Rejected</Badge>;
+      default:
+        return <Badge variant="secondary">Unknown</Badge>;
     }
   };
 
+  const filteredSubmissions = recentSubmissions.filter(submission => {
+    const matchesSearch = submission.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         submission.id.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesFilter = filterStatus === "all" || submission.status === filterStatus;
+    return matchesSearch && matchesFilter;
+  });
+
   return (
-    <AdminLayout 
-      title="Admin Dashboard" 
-      description="Comprehensive platform overview and management center"
-    >
-      <div className="space-y-8">
-        {/* Enhanced Stats Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-          <Card className="gradient-card border-2 border-ghana-gold/20 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Users className="w-4 h-4 mr-2" />
-                Total Members
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stats.totalMembers.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">+12% from last month</p>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card border-2 border-ghana-gold/20 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Clock className="w-4 h-4 mr-2" />
-                Pending Approvals
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-ghana-gold">{stats.pendingApprovals}</div>
-              <p className="text-xs text-muted-foreground">Requires attention</p>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card border-2 border-ghana-green/20 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Total Revenue
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-ghana-green">GHS {stats.totalRevenue.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">+8% from last month</p>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card border-2 border-blue-500/20 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <ShoppingCart className="w-4 h-4 mr-2" />
-                Total Orders
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-blue-500">{stats.totalOrders.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">{stats.pendingOrders} pending</p>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card border-2 border-purple-500/20 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Store className="w-4 h-4 mr-2" />
-                Total Vendors
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-purple-500">{stats.totalVendors}</div>
-              <p className="text-xs text-muted-foreground">{stats.pendingVendors} pending review</p>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card border-2 border-orange-500/20 hover:shadow-lg transition-shadow">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium flex items-center">
-                <Package className="w-4 h-4 mr-2" />
-                Total Products
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-orange-500">{stats.totalProducts.toLocaleString()}</div>
-              <p className="text-xs text-muted-foreground">{stats.pendingProducts} awaiting approval</p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Quick Actions Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="gradient-card hover:shadow-lg transition-all duration-200 cursor-pointer group">
-            <CardContent className="p-6">
-              <Link to="/admin/members" className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-ghana-gold/20 rounded-lg flex items-center justify-center group-hover:bg-ghana-gold/30 transition-colors">
-                  <Users className="w-6 h-6 text-ghana-gold" />
+    <div className="min-h-screen bg-gradient-to-br from-warm-cream to-background">
+      {/* Header */}
+      <div className="border-b bg-white/95 backdrop-blur-md sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link to="/" className="flex items-center space-x-2">
+                <div className="w-10 h-10 bg-ghana-gold rounded-lg flex items-center justify-center">
+                  <GraduationCap className="w-6 h-6 text-black" />
                 </div>
                 <div>
-                  <h3 className="font-semibold">Manage Members</h3>
-                  <p className="text-sm text-muted-foreground">Review applications & certificates</p>
-                  <Badge className="mt-2 bg-ghana-gold text-black">{stats.pendingApprovals} pending</Badge>
+                  <h1 className="text-lg font-bold text-foreground">GNACOPS</h1>
+                  <p className="text-xs text-muted-foreground">Admin Portal</p>
                 </div>
               </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card hover:shadow-lg transition-all duration-200 cursor-pointer group">
-            <CardContent className="p-6">
-              <Link to="/admin/orders" className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-blue-500/20 rounded-lg flex items-center justify-center group-hover:bg-blue-500/30 transition-colors">
-                  <ShoppingCart className="w-6 h-6 text-blue-500" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Order Management</h3>
-                  <p className="text-sm text-muted-foreground">Process & track orders</p>
-                  <Badge className="mt-2 bg-blue-500 text-white">{stats.pendingOrders} pending</Badge>
-                </div>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card hover:shadow-lg transition-all duration-200 cursor-pointer group">
-            <CardContent className="p-6">
-              <Link to="/admin/marketplace" className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-ghana-green/20 rounded-lg flex items-center justify-center group-hover:bg-ghana-green/30 transition-colors">
-                  <Store className="w-6 h-6 text-ghana-green" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">Marketplace</h3>
-                  <p className="text-sm text-muted-foreground">Vendors & products oversight</p>
-                  <Badge className="mt-2 bg-ghana-green text-white">GHS {stats.marketplaceRevenue.toLocaleString()}</Badge>
-                </div>
-              </Link>
-            </CardContent>
-          </Card>
-
-          <Card className="gradient-card hover:shadow-lg transition-all duration-200 cursor-pointer group">
-            <CardContent className="p-6">
-              <Link to="/admin/users" className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center group-hover:bg-purple-500/30 transition-colors">
-                  <Users className="w-6 h-6 text-purple-500" />
-                </div>
-                <div>
-                  <h3 className="font-semibold">User Management</h3>
-                  <p className="text-sm text-muted-foreground">Customer accounts & activity</p>
-                  <Badge className="mt-2 bg-purple-500 text-white">{stats.activeUsers} active</Badge>
-                </div>
-              </Link>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Recent Activity & Quick Stats */}
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Recent Activity */}
-          <Card className="gradient-card lg:col-span-2">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="flex items-center">
-                    <Activity className="w-5 h-5 mr-2" />
-                    Recent Platform Activity
-                  </CardTitle>
-                  <CardDescription>Latest actions across the platform</CardDescription>
-                </div>
-                <Button variant="outline" size="sm">
-                  <Eye className="w-4 h-4 mr-2" />
-                  View All
-                </Button>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {recentActivities.map((activity) => (
-                  <div key={activity.id} className="flex items-center space-x-4 p-3 border rounded-lg hover:bg-muted/50 transition-colors">
-                    <div className="flex-shrink-0">
-                      {getActivityIcon(activity.type)}
-                    </div>
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center justify-between">
-                        <p className="font-medium text-sm">{activity.description}</p>
-                        {getStatusBadge(activity.status)}
-                      </div>
-                      <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                        {activity.user && <span>User: {activity.user}</span>}
-                        {activity.amount && <span>Amount: {activity.amount}</span>}
-                        <span>•</span>
-                        <span>{activity.timestamp}</span>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Quick Stats & Actions */}
-          <div className="space-y-6">
-            <Card className="gradient-card">
-              <CardHeader>
-                <CardTitle className="text-lg">Platform Health</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">System Status</span>
-                  <Badge className="bg-ghana-green text-white">Operational</Badge>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Active Sessions</span>
-                  <span className="font-medium">1,234</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Server Load</span>
-                  <span className="font-medium text-ghana-green">23%</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm">Storage Used</span>
-                  <span className="font-medium">67%</span>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="gradient-card">
-              <CardHeader>
-                <CardTitle className="text-lg">Quick Actions</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Button 
-                  className="w-full justify-start bg-ghana-gold hover:bg-ghana-gold/90 text-black"
-                  onClick={() => handleQuickAction("Export Member Data")}
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Export Member Data
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => handleQuickAction("Generate Reports")}
-                >
-                  <FileText className="w-4 h-4 mr-2" />
-                  Generate Reports
-                </Button>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => handleQuickAction("Send Notifications")}
-                >
-                  <AlertTriangle className="w-4 h-4 mr-2" />
-                  Send Notifications
-                </Button>
-              </CardContent>
-            </Card>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Button variant="outline" size="sm">
+                <Settings className="w-4 h-4 mr-2" />
+                Settings
+              </Button>
+              <Button variant="outline" size="sm">
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </Button>
+            </div>
           </div>
         </div>
       </div>
-    </AdminLayout>
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2">Admin Dashboard</h1>
+          <p className="text-muted-foreground">Manage GNACOPS memberships and platform settings.</p>
+        </div>
+
+        {/* Stats Cards */}
+        <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+          <Card className="gradient-card border-2 border-ghana-gold/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Total Members</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{stats.totalMembers.toLocaleString()}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="gradient-card border-2 border-ghana-gold/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-ghana-gold">{stats.pendingApprovals}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="gradient-card border-2 border-ghana-green/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Approved Today</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-ghana-green">{stats.approvedToday}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="gradient-card border-2 border-ghana-red/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Rejected Today</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-ghana-red">{stats.rejectedToday}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="gradient-card border-2 border-ghana-gold/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">GHS {stats.totalRevenue.toLocaleString()}</div>
+            </CardContent>
+          </Card>
+
+          <Card className="gradient-card border-2 border-ghana-gold/20">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium">Pending Payments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold text-ghana-gold">{stats.pendingPayments}</div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Main Content */}
+        <Tabs defaultValue="members" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="members">Member Management</TabsTrigger>
+            <TabsTrigger value="forms">Form Builder</TabsTrigger>
+            <TabsTrigger value="certificates">Certificates</TabsTrigger>
+            <TabsTrigger value="workers">Workers</TabsTrigger>
+          </TabsList>
+
+          {/* Member Management Tab */}
+          <TabsContent value="members" className="space-y-6">
+            <Card className="gradient-card">
+              <CardHeader>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Recent Submissions</CardTitle>
+                    <CardDescription>Review and manage membership applications</CardDescription>
+                  </div>
+                  <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Export All
+                  </Button>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {/* Filters */}
+                <div className="flex items-center space-x-4 mb-6">
+                  <div className="flex-1">
+                    <Input
+                      placeholder="Search by name or ID..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="max-w-sm"
+                    />
+                  </div>
+                  <Select value={filterStatus} onValueChange={setFilterStatus}>
+                    <SelectTrigger className="w-40">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="pending">Pending</SelectItem>
+                      <SelectItem value="approved">Approved</SelectItem>
+                      <SelectItem value="rejected">Rejected</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Submissions Table */}
+                <div className="space-y-4">
+                  {filteredSubmissions.map((submission) => (
+                    <div key={submission.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50">
+                      <div className="flex-1 space-y-1">
+                        <div className="flex items-center space-x-3">
+                          <h4 className="font-semibold">{submission.name}</h4>
+                          {getStatusBadge(submission.status)}
+                        </div>
+                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                          <span>ID: {submission.id}</span>
+                          <span>Type: {submission.type}</span>
+                          <span>Region: {submission.region}</span>
+                          <span>Submitted: {submission.submittedAt}</span>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4 mr-2" />
+                          View
+                        </Button>
+                        {submission.status === "pending" && (
+                          <>
+                            <Button 
+                              size="sm" 
+                              className="bg-ghana-green hover:bg-ghana-green/90 text-white"
+                              onClick={() => handleApprove(submission.id)}
+                            >
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Approve
+                            </Button>
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => handleReject(submission.id)}
+                            >
+                              <XCircle className="w-4 h-4 mr-2" />
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Form Builder Tab */}
+          <TabsContent value="forms">
+            <Card className="gradient-card">
+              <CardHeader>
+                <CardTitle>Form Builder</CardTitle>
+                <CardDescription>Create and manage membership forms</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {[
+                    "Institutional Membership",
+                    "Teacher Council", 
+                    "Parent Council",
+                    "Proprietor",
+                    "Service Provider",
+                    "Non-Teaching Staff"
+                  ].map((formType) => (
+                    <div key={formType} className="border rounded-lg p-4 space-y-3">
+                      <h3 className="font-semibold">{formType}</h3>
+                      <p className="text-sm text-muted-foreground">Active form with dynamic fields</p>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4 mr-2" />
+                          Edit
+                        </Button>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4 mr-2" />
+                          Preview
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                
+                <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create New Form
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Certificates Tab */}
+          <TabsContent value="certificates">
+            <Card className="gradient-card">
+              <CardHeader>
+                <CardTitle>Certificate Management</CardTitle>
+                <CardDescription>Generate and manage membership certificates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <h4 className="font-semibold">Certificate Template</h4>
+                      <p className="text-sm text-muted-foreground">Standard GNACOPS membership certificate</p>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm">
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit Template
+                      </Button>
+                      <Button variant="outline" size="sm">
+                        <Eye className="w-4 h-4 mr-2" />
+                        Preview
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black">
+                    <Download className="w-4 h-4 mr-2" />
+                    Bulk Generate Certificates
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Workers Tab */}
+          <TabsContent value="workers">
+            <Card className="gradient-card">
+              <CardHeader>
+                <CardTitle>Worker Management</CardTitle>
+                <CardDescription>Manage admin users and their permissions</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 border rounded-lg">
+                    <div>
+                      <h4 className="font-semibold">Admin Users</h4>
+                      <p className="text-sm text-muted-foreground">3 active admin users</p>
+                    </div>
+                    <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Add Worker
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   );
 };
 
