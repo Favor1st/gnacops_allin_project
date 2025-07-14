@@ -6,6 +6,10 @@ import UserProfile from "./user/UserProfile";
 import UserDocuments from "./user/UserDocuments";
 import UserPayments from "./user/UserPayments";
 import DashboardHome from "./user/DashboardHome";
+import UserCertificates from "./user/UserCertificates";
+import UserNotifications from "./user/UserNotifications";
+import UserSettings from "./user/UserSettings";
+import UserSupport from "./user/UserSupport";
 
 const Dashboard = () => {
   return (
@@ -34,9 +38,10 @@ const Dashboard = () => {
               <Route path="/profile" element={<UserProfile />} />
               <Route path="/documents" element={<UserDocuments />} />
               <Route path="/payments" element={<UserPayments />} />
-              <Route path="/certificate" element={<div>Certificate Coming Soon</div>} />
-              <Route path="/notifications" element={<div>Notifications Coming Soon</div>} />
-              <Route path="/settings" element={<div>Settings Coming Soon</div>} />
+              <Route path="/certificates" element={<UserCertificates />} />
+              <Route path="/notifications" element={<UserNotifications />} />
+              <Route path="/settings" element={<UserSettings />} />
+              <Route path="/support" element={<UserSupport />} />
             </Routes>
           </div>
         </SidebarInset>

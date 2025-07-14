@@ -4,6 +4,11 @@ import { Routes, Route } from "react-router-dom";
 import AdminOverview from "./admin/AdminOverview";
 import AdminMembers from "./admin/AdminMembers";
 import AdminApplications from "./admin/AdminApplications";
+import AdminFormBuilder from "./admin/AdminFormBuilder";
+import AdminCertificates from "./admin/AdminCertificates";
+import AdminReports from "./admin/AdminReports";
+import AdminWorkers from "./admin/AdminWorkers";
+import AdminSettings from "./admin/AdminSettings";
 
 const AdminDashboard = () => {
   return (
@@ -31,11 +36,11 @@ const AdminDashboard = () => {
               <Route path="/" element={<AdminOverview />} />
               <Route path="/members" element={<AdminMembers />} />
               <Route path="/applications" element={<AdminApplications />} />
-              <Route path="/forms" element={<div>Form Builder Coming Soon</div>} />
-              <Route path="/certificates" element={<div>Certificates Coming Soon</div>} />
-              <Route path="/reports" element={<div>Reports Coming Soon</div>} />
-              <Route path="/workers" element={<div>Workers Coming Soon</div>} />
-              <Route path="/settings" element={<div>Settings Coming Soon</div>} />
+              <Route path="/forms" element={<AdminFormBuilder />} />
+              <Route path="/certificates" element={<AdminCertificates />} />
+              <Route path="/reports" element={<AdminReports />} />
+              <Route path="/workers" element={<AdminWorkers />} />
+              <Route path="/settings" element={<AdminSettings />} />
             </Routes>
           </div>
         </SidebarInset>

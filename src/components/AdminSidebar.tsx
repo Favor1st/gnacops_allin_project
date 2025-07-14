@@ -39,9 +39,10 @@ const adminMenuItems = [
 ];
 
 export function AdminSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+  const isCollapsed = state === "collapsed";
 
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = (path: string) =>
@@ -50,7 +51,7 @@ export function AdminSidebar() {
       : "hover:bg-muted/50";
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible>
+    <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
       <SidebarContent>
         {/* Header */}
         <div className="p-4 border-b">
@@ -58,7 +59,7 @@ export function AdminSidebar() {
             <div className="w-8 h-8 bg-ghana-gold rounded-lg flex items-center justify-center">
               <GraduationCap className="w-5 h-5 text-black" />
             </div>
-            {!collapsed && (
+            {!isCollapsed && (
               <div>
                 <h1 className="text-sm font-bold">GNACOPS</h1>
                 <p className="text-xs text-muted-foreground">Admin Portal</p>
@@ -76,7 +77,7 @@ export function AdminSidebar() {
                   <SidebarMenuButton asChild>
                     <NavLink to={item.url} className={getNavClasses(item.url)}>
                       <item.icon className="mr-2 h-4 w-4" />
-                      {!collapsed && <span>{item.title}</span>}
+                      {!isCollapsed && <span>{item.title}</span>}
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -93,7 +94,7 @@ export function AdminSidebar() {
             onClick={() => window.location.href = '/'}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            {!collapsed && <span>Logout</span>}
+            {!isCollapsed && <span>Logout</span>}
           </Button>
         </div>
       </SidebarContent>
