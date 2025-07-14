@@ -9,7 +9,6 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import RegistrationSuccess from "./pages/RegistrationSuccess";
 import Dashboard from "./pages/Dashboard";
-import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,8 +24,7 @@ const App = () => (
           <Route path="/login" element={<Login />} />
           <Route path="/register/:type" element={<Register />} />
           <Route path="/registration-success" element={<RegistrationSuccess />} />
-          <Route path="/dashboard/*" element={<Dashboard />} />
-          <Route path="/admin/*" element={<AdminDashboard />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
