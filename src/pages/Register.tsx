@@ -33,11 +33,6 @@ const Register = () => {
       description: "For school owners and administrators",
       color: "bg-earth-brown"
     },
-    "service-provider": {
-      title: "Service Provider Membership",
-      description: "For vendors and service providers to schools",
-      color: "bg-accent"
-    },
     "non-teaching": {
       title: "Non-Teaching Staff Membership",
       description: "For administrative and support staff",
