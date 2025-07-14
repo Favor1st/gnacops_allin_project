@@ -39,9 +39,10 @@ const adminMenuItems = [
 ];
 
 export function AdminSidebar() {
-  const { collapsed } = useSidebar();
+  const { state } = useSidebar();
   const location = useLocation();
   const currentPath = location.pathname;
+  const collapsed = state === "collapsed";
 
   const isActive = (path: string) => currentPath === path;
   const getNavClasses = (path: string) =>
@@ -50,7 +51,7 @@ export function AdminSidebar() {
       : "hover:bg-muted/50";
 
   return (
-    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible>
+    <Sidebar className={collapsed ? "w-14" : "w-64"} collapsible="icon">
       <SidebarContent>
         {/* Header */}
         <div className="p-4 border-b">
