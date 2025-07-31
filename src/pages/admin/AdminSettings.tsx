@@ -7,7 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Save, Shield, Mail, Globe, Database } from "lucide-react";
+import { Settings, Save, Shield, Mail, Globe, Database, AlertTriangle } from "lucide-react";
 
 const AdminSettings = () => {
   const { toast } = useToast();
@@ -47,6 +47,13 @@ const AdminSettings = () => {
     reminderDays: "7"
   });
 
+  const [paystackSettings, setPaystackSettings] = useState({
+    secretKey: "",
+    publicKey: "",
+    webhookSecret: "",
+    testMode: true
+  });
+
   const handleSaveGeneral = () => {
     toast({
       title: "Success",
@@ -75,6 +82,20 @@ const AdminSettings = () => {
     });
   };
 
+  const handleSavePaystack = () => {
+    toast({
+      title: "Success",
+      description: "Paystack settings updated successfully",
+    });
+  };
+
+  const handleTestPaystack = () => {
+    toast({
+      title: "Testing Paystack Connection",
+      description: "Testing connection to Paystack API...",
+    });
+  };
+
   const handleTestEmail = () => {
     toast({
       title: "Test Email Sent",
@@ -89,6 +110,43 @@ const AdminSettings = () => {
     });
   };
 
+  const handleMaintenanceMode = (enabled: boolean) => {
+    if (enabled) {
+      toast({
+        title: "Maintenance Mode Enabled",
+        description: "The system is now in maintenance mode. Users will see a maintenance page.",
+        variant: "destructive",
+      });
+    } else {
+      toast({
+        title: "Maintenance Mode Disabled",
+        description: "The system is now accessible to all users.",
+      });
+    }
+  };
+
+  const handleResetSettings = () => {
+    toast({
+      title: "Settings Reset",
+      description: "All settings have been reset to default values",
+      variant: "destructive",
+    });
+  };
+
+  const handleExportSettings = () => {
+    toast({
+      title: "Settings Exported",
+      description: "System settings have been exported to a configuration file",
+    });
+  };
+
+  const handleImportSettings = () => {
+    toast({
+      title: "Import Settings",
+      description: "Please select a configuration file to import",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -96,10 +154,20 @@ const AdminSettings = () => {
           <h2 className="text-2xl font-bold">System Settings</h2>
           <p className="text-muted-foreground">Configure your organization settings</p>
         </div>
-        <Button onClick={handleBackupDatabase}>
-          <Database className="mr-2 h-4 w-4" />
-          Backup Database
-        </Button>
+        <div className="flex space-x-2">
+          <Button variant="outline" onClick={handleExportSettings}>
+            <Settings className="mr-2 h-4 w-4" />
+            Export Settings
+          </Button>
+          <Button variant="outline" onClick={handleImportSettings}>
+            <Settings className="mr-2 h-4 w-4" />
+            Import Settings
+          </Button>
+          <Button onClick={handleBackupDatabase}>
+            <Database className="mr-2 h-4 w-4" />
+            Backup Database
+          </Button>
+        </div>
       </div>
 
       {/* General Settings */}
@@ -155,10 +223,16 @@ const AdminSettings = () => {
               onChange={(e) => setGeneralSettings({ ...generalSettings, address: e.target.value })}
             />
           </div>
-          <Button onClick={handleSaveGeneral}>
-            <Save className="mr-2 h-4 w-4" />
-            Save General Settings
-          </Button>
+          <div className="flex space-x-2">
+            <Button onClick={handleSaveGeneral}>
+              <Save className="mr-2 h-4 w-4" />
+              Save General Settings
+            </Button>
+            <Button variant="outline" onClick={handleResetSettings}>
+              <AlertTriangle className="mr-2 h-4 w-4" />
+              Reset to Default
+            </Button>
+          </div>
         </CardContent>
       </Card>
 
@@ -182,7 +256,10 @@ const AdminSettings = () => {
                 <Switch
                   id="maintenance"
                   checked={systemSettings.maintenanceMode}
-                  onCheckedChange={(checked) => setSystemSettings({ ...systemSettings, maintenanceMode: checked })}
+                  onCheckedChange={(checked) => {
+                    setSystemSettings({ ...systemSettings, maintenanceMode: checked });
+                    handleMaintenanceMode(checked);
+                  }}
                 />
               </div>
               <div className="flex items-center justify-between">
@@ -385,6 +462,85 @@ const AdminSettings = () => {
             <Save className="mr-2 h-4 w-4" />
             Save Payment Settings
           </Button>
+        </CardContent>
+      </Card>
+
+      {/* Paystack Settings */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center">
+            <Globe className="mr-2 h-5 w-5" />
+            Paystack Payment Gateway
+          </CardTitle>
+          <CardDescription>Configure Paystack payment gateway settings</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="paystackSecretKey">Secret Key</Label>
+              <Input
+                id="paystackSecretKey"
+                type="password"
+                placeholder="sk_test_..."
+                value={paystackSettings.secretKey}
+                onChange={(e) => setPaystackSettings({ ...paystackSettings, secretKey: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">Your Paystack secret key (starts with sk_test_ or sk_live_)</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="paystackPublicKey">Public Key</Label>
+              <Input
+                id="paystackPublicKey"
+                type="password"
+                placeholder="pk_test_..."
+                value={paystackSettings.publicKey}
+                onChange={(e) => setPaystackSettings({ ...paystackSettings, publicKey: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">Your Paystack public key (starts with pk_test_ or pk_live_)</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="paystackWebhookSecret">Webhook Secret</Label>
+              <Input
+                id="paystackWebhookSecret"
+                type="password"
+                placeholder="Optional webhook secret"
+                value={paystackSettings.webhookSecret}
+                onChange={(e) => setPaystackSettings({ ...paystackSettings, webhookSecret: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">Optional webhook secret for additional security</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="paystackTestMode">Test Mode</Label>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="paystackTestMode"
+                  checked={paystackSettings.testMode}
+                  onCheckedChange={(checked) => setPaystackSettings({ ...paystackSettings, testMode: checked })}
+                />
+                <Label htmlFor="paystackTestMode">Enable test mode (use test keys)</Label>
+              </div>
+            </div>
+          </div>
+          <div className="flex space-x-2">
+            <Button onClick={handleSavePaystack}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Paystack Settings
+            </Button>
+            <Button variant="outline" onClick={handleTestPaystack}>
+              <Globe className="mr-2 h-4 w-4" />
+              Test Connection
+            </Button>
+          </div>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-semibold text-blue-900 mb-2">Paystack Setup Instructions:</h4>
+            <ol className="text-sm text-blue-800 space-y-1">
+              <li>1. Create a Paystack account at <a href="https://paystack.com" target="_blank" rel="noopener noreferrer" className="underline">paystack.com</a></li>
+              <li>2. Get your API keys from the Paystack dashboard</li>
+              <li>3. For testing, use keys starting with "sk_test_" and "pk_test_"</li>
+              <li>4. For production, use keys starting with "sk_live_" and "pk_live_"</li>
+              <li>5. Set up webhook URL: https://your-domain.com/api/payments/webhook</li>
+            </ol>
+          </div>
         </CardContent>
       </Card>
     </div>

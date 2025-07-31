@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, ArrowLeft, GripVertical, X } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, ArrowLeft, GripVertical, X, Copy, Share2, Download } from "lucide-react";
 
 type FormField = {
   id: string;
@@ -135,6 +135,34 @@ const AdminFormBuilder = () => {
     toast({
       title: "Success",
       description: "Form status updated successfully",
+    });
+  };
+
+  const handleViewForm = (id: number, name: string) => {
+    toast({
+      title: "Viewing Form",
+      description: `Opening preview for ${name}`,
+    });
+  };
+
+  const handleCopyForm = (id: number, name: string) => {
+    toast({
+      title: "Form Copied",
+      description: `A copy of ${name} has been created`,
+    });
+  };
+
+  const handleShareForm = (id: number, name: string) => {
+    toast({
+      title: "Share Form",
+      description: `Preparing ${name} for sharing`,
+    });
+  };
+
+  const handleExportForm = (id: number, name: string) => {
+    toast({
+      title: "Export Form",
+      description: `Exporting ${name} as JSON`,
     });
   };
 
@@ -465,10 +493,39 @@ const AdminFormBuilder = () => {
                   >
                     {form.status === "active" ? "Deactivate" : "Activate"}
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewForm(form.id, form.name)}
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
-                  <Button variant="outline" size="sm" onClick={() => handleEditForm(form.id)}>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleCopyForm(form.id, form.name)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleShareForm(form.id, form.name)}
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleExportForm(form.id, form.name)}
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => handleEditForm(form.id)}
+                  >
                     <Edit className="h-4 w-4" />
                   </Button>
                   <Button 

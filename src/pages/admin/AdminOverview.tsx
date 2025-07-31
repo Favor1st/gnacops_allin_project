@@ -11,9 +11,12 @@ import {
   Eye,
   Plus
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { toast } from "@/hooks/use-toast";
 
 const AdminOverview = () => {
+  const navigate = useNavigate();
+  
   const stats = {
     totalMembers: 1247,
     pendingApprovals: 23,
@@ -61,6 +64,26 @@ const AdminOverview = () => {
       default:
         return <Badge variant="secondary">Unknown</Badge>;
     }
+  };
+
+  const handleViewApplication = (id: string) => {
+    toast({
+      title: "Viewing Application",
+      description: `Opening application ${id} for review.`,
+    });
+    navigate(`/admin/applications`);
+  };
+
+  const handleViewAllApplications = () => {
+    navigate("/admin/applications");
+  };
+
+  const handleManageMembers = () => {
+    navigate("/admin/members");
+  };
+
+  const handleGenerateCertificates = () => {
+    navigate("/admin/certificates");
   };
 
   return (
@@ -133,24 +156,29 @@ const AdminOverview = () => {
             <CardTitle className="text-lg">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Link to="/admin/applications">
-              <Button className="w-full bg-ghana-gold hover:bg-ghana-gold/90 text-black">
-                <ClipboardList className="w-4 h-4 mr-2" />
-                Review Applications
-              </Button>
-            </Link>
-            <Link to="/admin/members">
-              <Button variant="outline" className="w-full">
-                <Users className="w-4 h-4 mr-2" />
-                Manage Members
-              </Button>
-            </Link>
-            <Link to="/admin/certificates">
-              <Button variant="outline" className="w-full">
-                <Plus className="w-4 h-4 mr-2" />
-                Generate Certificates
-              </Button>
-            </Link>
+            <Button 
+              className="w-full bg-ghana-gold hover:bg-ghana-gold/90 text-black"
+              onClick={handleViewAllApplications}
+            >
+              <ClipboardList className="w-4 h-4 mr-2" />
+              Review Applications
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleManageMembers}
+            >
+              <Users className="w-4 h-4 mr-2" />
+              Manage Members
+            </Button>
+            <Button 
+              variant="outline" 
+              className="w-full"
+              onClick={handleGenerateCertificates}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Generate Certificates
+            </Button>
           </CardContent>
         </Card>
 
@@ -172,7 +200,11 @@ const AdminOverview = () => {
                       {submission.type} • {submission.region} • {submission.submittedAt}
                     </p>
                   </div>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewApplication(submission.id)}
+                  >
                     <Eye className="w-4 h-4 mr-1" />
                     View
                   </Button>
@@ -180,11 +212,13 @@ const AdminOverview = () => {
               ))}
             </div>
             <div className="mt-4">
-              <Link to="/admin/applications">
-                <Button variant="outline" className="w-full">
-                  View All Applications
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={handleViewAllApplications}
+              >
+                View All Applications
+              </Button>
             </div>
           </CardContent>
         </Card>

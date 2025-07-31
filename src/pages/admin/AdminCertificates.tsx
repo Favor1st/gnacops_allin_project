@@ -69,18 +69,44 @@ const AdminCertificates = () => {
     });
   };
 
-  const handleDownloadCertificate = (memberName: string) => {
+  const handleDownloadCertificate = (memberName: string, certificateNumber: string) => {
     toast({
       title: "Download Started",
-      description: `Downloading certificate for ${memberName}`,
+      description: `Downloading certificate for ${memberName} (${certificateNumber})`,
     });
+    // In a real app, this would trigger a PDF download
   };
 
-  const handleEmailCertificate = (memberName: string, email: string) => {
+  const handleEmailCertificate = (memberName: string, email: string, certificateNumber: string) => {
     toast({
       title: "Email Sent",
-      description: `Certificate emailed to ${email}`,
+      description: `Certificate for ${memberName} (${certificateNumber}) has been sent to ${email}`,
     });
+    // In a real app, this would send an email with the certificate attached
+  };
+
+  const handleViewCertificate = (memberName: string, certificateNumber: string) => {
+    toast({
+      title: "Viewing Certificate",
+      description: `Opening certificate preview for ${memberName} (${certificateNumber})`,
+    });
+    // In a real app, this would open a modal or navigate to a preview page
+  };
+
+  const handleBulkDownload = () => {
+    toast({
+      title: "Bulk Download Started",
+      description: "Preparing all certificates for download...",
+    });
+    // In a real app, this would create a zip file with all certificates
+  };
+
+  const handleBulkEmail = () => {
+    toast({
+      title: "Bulk Email Started",
+      description: "Sending certificates to all members...",
+    });
+    // In a real app, this would send emails to all members with their certificates
   };
 
   const getStatusBadge = (status: string) => {
@@ -108,6 +134,14 @@ const AdminCertificates = () => {
           <p className="text-muted-foreground">Issue and manage member certificates</p>
         </div>
         <div className="flex space-x-2">
+          <Button variant="outline" onClick={handleBulkDownload}>
+            <Download className="mr-2 h-4 w-4" />
+            Bulk Download
+          </Button>
+          <Button variant="outline" onClick={handleBulkEmail}>
+            <Send className="mr-2 h-4 w-4" />
+            Bulk Email
+          </Button>
           <Select value={filter} onValueChange={setFilter}>
             <SelectTrigger className="w-40">
               <SelectValue placeholder="Filter by status" />
@@ -198,14 +232,14 @@ const AdminCertificates = () => {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleDownloadCertificate(certificate.memberName)}
+                        onClick={() => handleDownloadCertificate(certificate.memberName, certificate.certificateNumber)}
                       >
                         <Download className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => handleEmailCertificate(certificate.memberName, certificate.memberEmail)}
+                        onClick={() => handleEmailCertificate(certificate.memberName, certificate.memberEmail, certificate.certificateNumber)}
                       >
                         <Send className="h-4 w-4" />
                       </Button>
@@ -218,7 +252,11 @@ const AdminCertificates = () => {
                       </Button>
                     </>
                   )}
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleViewCertificate(certificate.memberName, certificate.certificateNumber)}
+                  >
                     <Eye className="h-4 w-4" />
                   </Button>
                 </div>

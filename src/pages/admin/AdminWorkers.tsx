@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { UserPlus, Edit, Trash2, Shield, User } from "lucide-react";
+import { UserPlus, Edit, Trash2, Shield, User, Eye, Key } from "lucide-react";
 
 const AdminWorkers = () => {
   const { toast } = useToast();
@@ -112,6 +112,34 @@ const AdminWorkers = () => {
     toast({
       title: "Success",
       description: "Worker status updated successfully",
+    });
+  };
+
+  const handleViewWorker = (id: number, name: string) => {
+    toast({
+      title: "Viewing Worker",
+      description: `Opening detailed view for ${name}`,
+    });
+  };
+
+  const handleEditWorker = (id: number, name: string) => {
+    toast({
+      title: "Editing Worker",
+      description: `Opening edit form for ${name}`,
+    });
+  };
+
+  const handleManagePermissions = (id: number, name: string) => {
+    toast({
+      title: "Manage Permissions",
+      description: `Opening permission management for ${name}`,
+    });
+  };
+
+  const handleResetPassword = (id: number, name: string) => {
+    toast({
+      title: "Password Reset",
+      description: `Password reset email sent to ${name}`,
     });
   };
 
@@ -296,12 +324,37 @@ const AdminWorkers = () => {
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => handleViewWorker(worker.id, worker.name)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditWorker(worker.id, worker.name)}
+                  >
+                    <Edit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleManagePermissions(worker.id, worker.name)}
+                  >
+                    <Shield className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleResetPassword(worker.id, worker.name)}
+                  >
+                    <Key className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleToggleStatus(worker.id)}
                   >
                     {worker.status === "active" ? "Deactivate" : "Activate"}
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Edit className="h-4 w-4" />
                   </Button>
                   <Button 
                     variant="outline" 

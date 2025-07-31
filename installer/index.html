@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GNACOPS Marketplace - Installation Wizard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .step-active { @apply bg-blue-600 text-white; }
+        .step-completed { @apply bg-green-600 text-white; }
+        .step-pending { @apply bg-gray-300 text-gray-600; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="text-center mb-8">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
+                <i class="fas fa-pills text-white text-2xl"></i>
+            </div>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">GNACOPS Marketplace</h1>
+            <p class="text-gray-600">Installation Wizard</p>
+        </div>
+
+        <!-- Progress Steps -->
+        <div class="max-w-4xl mx-auto mb-8">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <div id="step1" class="step-active w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold">1</div>
+                    <span class="ml-2 text-sm font-medium">System Check</span>
+                </div>
+                <div class="flex-1 h-1 bg-gray-300 mx-4"></div>
+                <div class="flex items-center">
+                    <div id="step2" class="step-pending w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold">2</div>
+                    <span class="ml-2 text-sm font-medium">Database Setup</span>
+                </div>
+                <div class="flex-1 h-1 bg-gray-300 mx-4"></div>
+                <div class="flex items-center">
+                    <div id="step3" class="step-pending w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold">3</div>
+                    <span class="ml-2 text-sm font-medium">Configuration</span>
+                </div>
+                <div class="flex-1 h-1 bg-gray-300 mx-4"></div>
+                <div class="flex items-center">
+                    <div id="step4" class="step-pending w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold">4</div>
+                    <span class="ml-2 text-sm font-medium">Installation</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Installation Form -->
+        <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-8">
+            <!-- Step 1: System Check -->
+            <div id="step1-content" class="step-content">
+                <h2 class="text-2xl font-bold mb-6">System Requirements Check</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                            <h3 class="font-semibold">Node.js Version</h3>
+                            <p class="text-sm text-gray-600">Required: 18.0.0 or higher</p>
+                        </div>
+                        <div id="nodejs-status" class="flex items-center">
+                            <i class="fas fa-spinner fa-spin text-blue-600"></i>
+                            <span class="ml-2 text-sm">Checking...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                            <h3 class="font-semibold">MySQL Database</h3>
+                            <p class="text-sm text-gray-600">Required: MySQL 8.0 or higher</p>
+                        </div>
+                        <div id="mysql-status" class="flex items-center">
+                            <i class="fas fa-spinner fa-spin text-blue-600"></i>
+                            <span class="ml-2 text-sm">Checking...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                            <h3 class="font-semibold">File Permissions</h3>
+                            <p class="text-sm text-gray-600">Required: Write access to installation directory</p>
+                        </div>
+                        <div id="permissions-status" class="flex items-center">
+                            <i class="fas fa-spinner fa-spin text-blue-600"></i>
+                            <span class="ml-2 text-sm">Checking...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button id="next-step1" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50" disabled>
+                        Next Step
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 2: Database Setup -->
+            <div id="step2-content" class="step-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Database Configuration</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Database Host</label>
+                        <input type="text" id="db-host" value="localhost" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Database Port</label>
+                        <input type="text" id="db-port" value="3306" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Database Name</label>
+                        <input type="text" id="db-name" value="gnacops_db" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Database User</label>
+                        <input type="text" id="db-user" value="root" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Database Password</label>
+                        <input type="password" id="db-password" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-between">
+                    <button id="prev-step2" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                        Previous
+                    </button>
+                    <button id="test-db" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                        Test Connection
+                    </button>
+                    <button id="next-step2" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50" disabled>
+                        Next Step
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Configuration -->
+            <div id="step3-content" class="step-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Application Configuration</h2>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">General Settings</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Application URL</label>
+                                <input type="url" id="app-url" placeholder="https://your-domain.com" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Admin Email</label>
+                                <input type="email" id="admin-email" value="admin@gnacops.org" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Paystack Configuration</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Paystack Secret Key</label>
+                                <input type="password" id="paystack-secret" placeholder="sk_test_..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Paystack Public Key</label>
+                                <input type="password" id="paystack-public" placeholder="pk_test_..." class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            </div>
+                        </div>
+                        <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                            <p class="text-sm text-blue-800">
+                                <i class="fas fa-info-circle mr-2"></i>
+                                Get your Paystack API keys from your <a href="https://paystack.com" target="_blank" class="underline">Paystack dashboard</a>. 
+                                Use test keys for development and live keys for production.
+                            </p>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">Security Settings</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">JWT Secret</label>
+                                <input type="text" id="jwt-secret" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <button id="generate-jwt" class="mt-2 text-sm text-blue-600 hover:text-blue-800">Generate Random Secret</button>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Environment</label>
+                                <select id="environment" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="development">Development</option>
+                                    <option value="production">Production</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-between">
+                    <button id="prev-step3" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                        Previous
+                    </button>
+                    <button id="next-step3" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                        Next Step
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 4: Installation -->
+            <div id="step4-content" class="step-content hidden">
+                <h2 class="text-2xl font-bold mb-6">Installation Progress</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                            <h3 class="font-semibold">Installing Dependencies</h3>
+                            <p class="text-sm text-gray-600">Installing Node.js packages</p>
+                        </div>
+                        <div id="deps-status" class="flex items-center">
+                            <i class="fas fa-spinner fa-spin text-blue-600"></i>
+                            <span class="ml-2 text-sm">Installing...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                            <h3 class="font-semibold">Building Application</h3>
+                            <p class="text-sm text-gray-600">Compiling frontend assets</p>
+                        </div>
+                        <div id="build-status" class="flex items-center">
+                            <i class="fas fa-clock text-gray-400"></i>
+                            <span class="ml-2 text-sm text-gray-500">Pending...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                            <h3 class="font-semibold">Database Migration</h3>
+                            <p class="text-sm text-gray-600">Setting up database tables</p>
+                        </div>
+                        <div id="migration-status" class="flex items-center">
+                            <i class="fas fa-clock text-gray-400"></i>
+                            <span class="ml-2 text-sm text-gray-500">Pending...</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 border rounded-lg">
+                        <div>
+                            <h3 class="font-semibold">Starting Services</h3>
+                            <p class="text-sm text-gray-600">Starting application server</p>
+                        </div>
+                        <div id="service-status" class="flex items-center">
+                            <i class="fas fa-clock text-gray-400"></i>
+                            <span class="ml-2 text-sm text-gray-500">Pending...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-6">
+                    <div id="installation-log" class="bg-gray-100 p-4 rounded-lg h-32 overflow-y-auto text-sm font-mono">
+                        <div class="text-gray-500">Installation log will appear here...</div>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-between">
+                    <button id="prev-step4" class="bg-gray-300 text-gray-700 px-6 py-2 rounded-lg hover:bg-gray-400">
+                        Previous
+                    </button>
+                    <button id="start-installation" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
+                        Start Installation
+                    </button>
+                    <button id="finish-installation" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 hidden">
+                        Finish Installation
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Modal -->
+        <div id="success-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center">
+            <div class="bg-white rounded-lg p-8 max-w-md mx-4 text-center">
+                <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="fas fa-check text-green-600 text-2xl"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Installation Complete!</h3>
+                <p class="text-gray-600 mb-6">Your GNACOPS Marketplace has been successfully installed.</p>
+                <div class="space-y-2 text-sm text-left bg-gray-50 p-4 rounded-lg mb-6">
+                    <div><strong>Admin URL:</strong> <span id="admin-url"></span></div>
+                    <div><strong>Default Admin:</strong> admin@gnacops.org</div>
+                    <div><strong>Default Password:</strong> admin123</div>
+                </div>
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <strong>Important:</strong> Change the default admin password after first login!
+                    </p>
+                </div>
+                <button id="go-to-admin" class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700">
+                    Go to Admin Panel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="installer.js"></script>
+</body>
+</html> 

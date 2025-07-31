@@ -13,8 +13,10 @@ import {
   MessageSquare
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const AdminApplications = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
 
@@ -119,6 +121,30 @@ const AdminApplications = () => {
     });
   };
 
+  const handleViewApplication = (id: string) => {
+    toast({
+      title: "Viewing Application",
+      description: `Opening detailed view for application ${id}.`,
+    });
+    // In a real app, this would navigate to a detailed view page
+  };
+
+  const handleContactApplicant = (email: string, name: string) => {
+    toast({
+      title: "Contact Initiated",
+      description: `Opening email client to contact ${name} at ${email}.`,
+    });
+    // In a real app, this would open email client or messaging system
+  };
+
+  const handleExportAll = () => {
+    toast({
+      title: "Export Started",
+      description: "Preparing application data for export...",
+    });
+    // In a real app, this would trigger a download
+  };
+
   const filteredApplications = applications.filter(application => {
     const matchesSearch = application.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          application.id.toLowerCase().includes(searchTerm.toLowerCase());
@@ -134,7 +160,7 @@ const AdminApplications = () => {
           <p className="text-muted-foreground">Review and manage membership applications</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExportAll}>
             <Download className="w-4 h-4 mr-2" />
             Export All
           </Button>
@@ -247,11 +273,19 @@ const AdminApplications = () => {
                   
                   <div className="flex flex-col space-y-2 ml-4">
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewApplication(application.id)}
+                      >
                         <Eye className="w-4 h-4 mr-1" />
                         View
                       </Button>
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleContactApplicant(application.email, application.name)}
+                      >
                         <MessageSquare className="w-4 h-4 mr-1" />
                         Contact
                       </Button>

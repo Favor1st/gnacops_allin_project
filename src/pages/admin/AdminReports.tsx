@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { BarChart3, Download, Calendar, Users, TrendingUp, FileText } from "lucide-react";
+import { BarChart3, Download, Calendar, Users, TrendingUp, FileText, Eye, Share2 } from "lucide-react";
 
 const AdminReports = () => {
   const { toast } = useToast();
@@ -102,6 +102,34 @@ const AdminReports = () => {
     });
   };
 
+  const handleViewReport = (reportName: string) => {
+    toast({
+      title: "Viewing Report",
+      description: `Opening ${reportName} in preview mode`,
+    });
+  };
+
+  const handleShareReport = (reportName: string) => {
+    toast({
+      title: "Share Report",
+      description: `Preparing ${reportName} for sharing`,
+    });
+  };
+
+  const handleExportAllReports = () => {
+    toast({
+      title: "Export All Reports",
+      description: "Preparing all reports for bulk download",
+    });
+  };
+
+  const handleCustomReport = () => {
+    toast({
+      title: "Custom Report Builder",
+      description: "Opening custom report builder interface",
+    });
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -109,10 +137,20 @@ const AdminReports = () => {
           <h2 className="text-2xl font-bold">Reports & Analytics</h2>
           <p className="text-muted-foreground">Generate insights and analytics reports</p>
         </div>
-        <Button onClick={handleScheduleReport}>
-          <Calendar className="mr-2 h-4 w-4" />
-          Schedule Reports
-        </Button>
+        <div className="flex space-x-2">
+          <Button variant="outline" onClick={handleCustomReport}>
+            <BarChart3 className="mr-2 h-4 w-4" />
+            Custom Report
+          </Button>
+          <Button variant="outline" onClick={handleExportAllReports}>
+            <Download className="mr-2 h-4 w-4" />
+            Export All
+          </Button>
+          <Button onClick={handleScheduleReport}>
+            <Calendar className="mr-2 h-4 w-4" />
+            Schedule Reports
+          </Button>
+        </div>
       </div>
 
       {/* Quick Stats */}
@@ -205,9 +243,23 @@ const AdminReports = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      onClick={() => handleViewReport(report.name)}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       onClick={() => handleDownloadReport(report.name)}
                     >
                       <Download className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleShareReport(report.name)}
+                    >
+                      <Share2 className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="outline"

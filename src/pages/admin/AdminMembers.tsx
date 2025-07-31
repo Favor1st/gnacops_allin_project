@@ -16,8 +16,10 @@ import {
   UserX
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const AdminMembers = () => {
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterType, setFilterType] = useState("all");
@@ -112,6 +114,46 @@ const AdminMembers = () => {
     });
   };
 
+  const handleViewMember = (id: string) => {
+    toast({
+      title: "Viewing Member",
+      description: `Opening detailed view for member ${id}.`,
+    });
+    // In a real app, this would navigate to a detailed member view
+  };
+
+  const handleEditMember = (id: string) => {
+    toast({
+      title: "Editing Member",
+      description: `Opening edit form for member ${id}.`,
+    });
+    // In a real app, this would open an edit modal or navigate to edit page
+  };
+
+  const handleDeleteMember = (id: string) => {
+    toast({
+      title: "Member Deleted",
+      description: `Member ${id} has been removed from the system.`,
+      variant: "destructive",
+    });
+  };
+
+  const handleAddMember = () => {
+    toast({
+      title: "Add Member",
+      description: "Opening member registration form.",
+    });
+    // In a real app, this would open a registration form or navigate to add member page
+  };
+
+  const handleExportMembers = () => {
+    toast({
+      title: "Export Started",
+      description: "Preparing member data for export...",
+    });
+    // In a real app, this would trigger a download
+  };
+
   const filteredMembers = members.filter(member => {
     const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          member.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -129,11 +171,11 @@ const AdminMembers = () => {
           <p className="text-muted-foreground">Manage all GNACOPS members</p>
         </div>
         <div className="flex space-x-2">
-          <Button variant="outline">
+          <Button variant="outline" onClick={handleExportMembers}>
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>
-          <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black">
+          <Button className="bg-ghana-gold hover:bg-ghana-gold/90 text-black" onClick={handleAddMember}>
             <Plus className="w-4 h-4 mr-2" />
             Add Member
           </Button>
@@ -204,11 +246,19 @@ const AdminMembers = () => {
                   </div>
                   
                   <div className="flex items-center space-x-2 ml-4">
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleViewMember(member.id)}
+                    >
                       <Eye className="w-4 h-4 mr-1" />
                       View
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => handleEditMember(member.id)}
+                    >
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>

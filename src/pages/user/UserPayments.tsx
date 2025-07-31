@@ -81,6 +81,34 @@ const UserPayments = () => {
     });
   };
 
+  const handleViewPayment = (paymentId: string, description: string) => {
+    toast({
+      title: "Viewing Payment",
+      description: `Opening detailed view for ${description} (${paymentId})`,
+    });
+  };
+
+  const handlePayUpcoming = (description: string, amount: number) => {
+    toast({
+      title: "Payment Initiated",
+      description: `Processing payment for ${description} (₵${amount.toFixed(2)})`,
+    });
+  };
+
+  const handleExportPayments = () => {
+    toast({
+      title: "Export Started",
+      description: "Preparing payment history for export...",
+    });
+  };
+
+  const handleSetUpAutoPay = () => {
+    toast({
+      title: "Auto-Pay Setup",
+      description: "Opening automatic payment setup wizard...",
+    });
+  };
+
   const totalPaid = payments.filter(p => p.status === 'completed').reduce((sum, payment) => sum + payment.amount, 0);
   const pendingAmount = payments.filter(p => p.status === 'pending').reduce((sum, payment) => sum + payment.amount, 0);
 
@@ -91,13 +119,23 @@ const UserPayments = () => {
           <h1 className="text-3xl font-bold">Payments & Billing</h1>
           <p className="text-muted-foreground">Manage your membership payments and billing history</p>
         </div>
-        <Button 
-          className="bg-ghana-gold hover:bg-ghana-gold/90 text-black"
-          onClick={handleMakePayment}
-        >
-          <CreditCard className="w-4 h-4 mr-2" />
-          Make Payment
-        </Button>
+        <div className="flex space-x-2">
+          <Button variant="outline" onClick={handleExportPayments}>
+            <Download className="w-4 h-4 mr-2" />
+            Export
+          </Button>
+          <Button variant="outline" onClick={handleSetUpAutoPay}>
+            <Calendar className="w-4 h-4 mr-2" />
+            Auto-Pay
+          </Button>
+          <Button 
+            className="bg-ghana-gold hover:bg-ghana-gold/90 text-black"
+            onClick={handleMakePayment}
+          >
+            <CreditCard className="w-4 h-4 mr-2" />
+            Make Payment
+          </Button>
+        </div>
       </div>
 
       {/* Payment Summary */}
@@ -170,7 +208,7 @@ const UserPayments = () => {
                     <span className="text-lg font-bold">₵{payment.amount.toFixed(2)}</span>
                     <Button 
                       className="bg-ghana-gold hover:bg-ghana-gold/90 text-black"
-                      onClick={handleMakePayment}
+                      onClick={() => handlePayUpcoming(payment.description, payment.amount)}
                     >
                       Pay Now
                     </Button>
@@ -214,7 +252,11 @@ const UserPayments = () => {
                   <div className="flex items-center space-x-4">
                     <span className="text-lg font-bold">₵{payment.amount.toFixed(2)}</span>
                     <div className="flex space-x-2">
-                      <Button variant="outline" size="sm">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleViewPayment(payment.id, payment.description)}
+                      >
                         <Eye className="w-4 h-4 mr-1" />
                         View
                       </Button>
