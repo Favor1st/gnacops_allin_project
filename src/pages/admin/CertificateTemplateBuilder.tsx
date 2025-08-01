@@ -385,14 +385,14 @@ const CertificateTemplateBuilder = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-4">
         {/* Template List */}
-        <Card className="lg:col-span-1">
+        <Card className="xl:col-span-3">
           <CardHeader>
             <CardTitle>Templates</CardTitle>
             <CardDescription>Select a template to edit</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-2 max-h-96 overflow-y-auto">
             {templates.map((template) => (
               <div
                 key={template.id}
@@ -403,9 +403,9 @@ const CertificateTemplateBuilder = () => {
               >
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="font-medium">{template.name}</h4>
-                    <p className="text-sm text-muted-foreground">{template.description}</p>
-                    <Badge variant={template.status === 'active' ? 'default' : 'secondary'}>
+                    <h4 className="font-medium text-sm">{template.name}</h4>
+                    <p className="text-xs text-muted-foreground">{template.description}</p>
+                    <Badge variant={template.status === 'active' ? 'default' : 'secondary'} className="text-xs">
                       {template.status}
                     </Badge>
                   </div>
@@ -438,7 +438,7 @@ const CertificateTemplateBuilder = () => {
         </Card>
 
         {/* Canvas */}
-        <Card className="lg:col-span-2">
+        <Card className="xl:col-span-6">
           <CardHeader>
             <CardTitle>Design Canvas</CardTitle>
             <CardDescription>Drag and drop components to design your certificate</CardDescription>
@@ -447,19 +447,20 @@ const CertificateTemplateBuilder = () => {
             {currentTemplate ? (
               <div className="space-y-4">
                 {/* Template Settings */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
-                    <Label>Template Name</Label>
+                    <Label className="text-sm">Template Name</Label>
                     <Input
                       value={currentTemplate.name}
                       onChange={(e) => setCurrentTemplate({
                         ...currentTemplate,
                         name: e.target.value
                       })}
+                      className="text-sm"
                     />
                   </div>
                   <div>
-                    <Label>Status</Label>
+                    <Label className="text-sm">Status</Label>
                     <Select
                       value={currentTemplate.status}
                       onValueChange={(value) => setCurrentTemplate({
@@ -467,7 +468,7 @@ const CertificateTemplateBuilder = () => {
                         status: value
                       })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -480,17 +481,18 @@ const CertificateTemplateBuilder = () => {
                 </div>
 
                 {/* Canvas */}
-                <div
-                  ref={canvasRef}
-                  className="relative border-2 border-dashed border-gray-300 bg-white"
-                  style={{
-                    width: currentTemplate.settings.width,
-                    height: currentTemplate.settings.height,
-                    backgroundColor: currentTemplate.settings.backgroundColor,
-                    borderColor: currentTemplate.settings.borderColor,
-                    borderWidth: currentTemplate.settings.borderWidth
-                  }}
-                >
+                <div className="overflow-auto border rounded-lg p-4 bg-gray-50">
+                  <div
+                    ref={canvasRef}
+                    className="relative border-2 border-dashed border-gray-300 bg-white mx-auto"
+                    style={{
+                      width: Math.min(currentTemplate.settings.width, 800),
+                      height: Math.min(currentTemplate.settings.height, 600),
+                      backgroundColor: currentTemplate.settings.backgroundColor,
+                      borderColor: currentTemplate.settings.borderColor,
+                      borderWidth: currentTemplate.settings.borderWidth
+                    }}
+                  >
                   {currentTemplate.components.map((component) => (
                     <div
                       key={component.id}
@@ -555,15 +557,15 @@ const CertificateTemplateBuilder = () => {
         </Card>
 
         {/* Component Panel */}
-        <Card className="lg:col-span-1">
+        <Card className="xl:col-span-3">
           <CardHeader>
             <CardTitle>Components</CardTitle>
             <CardDescription>Drag components to the canvas</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 max-h-96 overflow-y-auto">
             {/* Available Components */}
             <div>
-              <Label>Add Components</Label>
+              <Label className="text-sm">Add Components</Label>
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {availableComponents.map((comp) => (
                   <Button
@@ -571,9 +573,9 @@ const CertificateTemplateBuilder = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleAddComponent(comp.type)}
-                    className="flex flex-col items-center p-2 h-auto"
+                    className="flex flex-col items-center p-2 h-auto text-xs"
                   >
-                    <comp.icon className="w-4 h-4 mb-1" />
+                    <comp.icon className="w-3 h-3 mb-1" />
                     <span className="text-xs">{comp.label}</span>
                   </Button>
                 ))}
@@ -582,81 +584,88 @@ const CertificateTemplateBuilder = () => {
 
             {/* Component Properties */}
             {selectedComponent && (
-              <div className="space-y-4">
-                <Label>Component Properties</Label>
+              <div className="space-y-3">
+                <Label className="text-sm">Component Properties</Label>
                 
                 <div>
-                  <Label>Content</Label>
+                  <Label className="text-xs">Content</Label>
                   <Input
                     value={selectedComponent.content}
                     onChange={(e) => handleComponentUpdate({ content: e.target.value })}
+                    className="text-xs"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label>X Position</Label>
+                    <Label className="text-xs">X Position</Label>
                     <Input
                       type="number"
                       value={selectedComponent.x}
                       onChange={(e) => handleComponentUpdate({ x: parseInt(e.target.value) })}
+                      className="text-xs"
                     />
                   </div>
                   <div>
-                    <Label>Y Position</Label>
+                    <Label className="text-xs">Y Position</Label>
                     <Input
                       type="number"
                       value={selectedComponent.y}
                       onChange={(e) => handleComponentUpdate({ y: parseInt(e.target.value) })}
+                      className="text-xs"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Label>Width</Label>
+                    <Label className="text-xs">Width</Label>
                     <Input
                       type="number"
                       value={selectedComponent.width}
                       onChange={(e) => handleComponentUpdate({ width: parseInt(e.target.value) })}
+                      className="text-xs"
                     />
                   </div>
                   <div>
-                    <Label>Height</Label>
+                    <Label className="text-xs">Height</Label>
                     <Input
                       type="number"
                       value={selectedComponent.height}
                       onChange={(e) => handleComponentUpdate({ height: parseInt(e.target.value) })}
+                      className="text-xs"
                     />
                   </div>
                 </div>
 
                 <div>
-                  <Label>Font Size</Label>
+                  <Label className="text-xs">Font Size</Label>
                   <Input
                     type="number"
                     value={selectedComponent.fontSize}
                     onChange={(e) => handleComponentUpdate({ fontSize: parseInt(e.target.value) })}
+                    className="text-xs"
                   />
                 </div>
 
                 <div>
-                  <Label>Color</Label>
+                  <Label className="text-xs">Color</Label>
                   <Input
                     type="color"
                     value={selectedComponent.color}
                     onChange={(e) => handleComponentUpdate({ color: e.target.value })}
+                    className="h-8"
                   />
                 </div>
 
                 {selectedComponent.type === 'variable' && (
                   <div>
-                    <Label>Variable</Label>
+                    <Label className="text-xs">Variable</Label>
                     <Select
                       value={selectedComponent.variable || ''}
                       onValueChange={(value) => handleComponentUpdate({ variable: value })}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="text-xs">
                         <SelectValue placeholder="Select variable" />
                       </SelectTrigger>
                       <SelectContent>
