@@ -58,14 +58,18 @@ print_status "Installing Nginx..."
 sudo apt install nginx -y
 
 # Create application directory
-print_status "Creating application directory..."
-sudo mkdir -p /var/www/gnacops
-sudo chown $USER:$USER /var/www/gnacops
+APP_DIR="/home/$USER/gnacops-marketplace"
+print_status "Creating application directory: $APP_DIR"
+mkdir -p $APP_DIR
+cd $APP_DIR
 
-# Copy application files (assuming script is run from project directory)
-print_status "Copying application files..."
-cp -r . /var/www/gnacops/
-cd /var/www/gnacops
+# Clone the repository (if not already present)
+if [ ! -d "gnacops_allin_project" ]; then
+    print_status "Cloning repository..."
+    git clone https://github.com/Favor1st/gnacops_allin_project.git
+fi
+
+cd gnacops_allin_project
 
 # Install dependencies
 print_status "Installing Node.js dependencies..."
@@ -75,84 +79,32 @@ npm install
 print_status "Building the application..."
 npm run build
 
-# Create environment file
-print_status "Creating environment file..."
-if [ ! -f .env ]; then
+# Create .env file
+print_status "Creating .env file..."
+if [ ! -f ".env" ]; then
     cp env.example .env
-    print_warning "Please edit .env file with your configuration"
+    print_warning "Please edit the .env file with your configuration"
 fi
 
-# Create MySQL database
-print_status "Setting up MySQL database..."
+# Create database
+print_status "Setting up database..."
 sudo mysql -e "CREATE DATABASE IF NOT EXISTS gnacops_db;"
 sudo mysql -e "CREATE USER IF NOT EXISTS 'gnacops_user'@'localhost' IDENTIFIED BY 'your_secure_password';"
 sudo mysql -e "GRANT ALL PRIVILEGES ON gnacops_db.* TO 'gnacops_user'@'localhost';"
 sudo mysql -e "FLUSH PRIVILEGES;"
 
-# Run database migration
-print_status "Running database migration..."
+# Run database migrations
+print_status "Running database migrations..."
 npm run db:migrate
-
-# Create PM2 ecosystem file
-print_status "Creating PM2 configuration..."
-cat > ecosystem.config.js << EOF
-module.exports = {
-  apps: [{
-    name: 'gnacops-api',
-    script: 'server/index.js',
-    instances: 'max',
-    exec_mode: 'cluster',
-    env: {
-      NODE_ENV: 'production',
-      PORT: 5000
-    },
-    error_file: '/var/log/gnacops/error.log',
-    out_file: '/var/log/gnacops/out.log',
-    log_file: '/var/log/gnacops/combined.log',
-    time: true
-  }]
-};
-EOF
-
-# Create log directory
-sudo mkdir -p /var/log/gnacops
-sudo chown $USER:$USER /var/log/gnacops
 
 # Configure Nginx
 print_status "Configuring Nginx..."
-sudo tee /etc/nginx/sites-available/gnacops << EOF
+sudo tee /etc/nginx/sites-available/gnacops-marketplace << EOF
 server {
     listen 80;
-    server_name your-domain.com www.your-domain.com;
+    server_name your-domain.com;
 
-    # Security headers
-    add_header X-Frame-Options "SAMEORIGIN" always;
-    add_header X-XSS-Protection "1; mode=block" always;
-    add_header X-Content-Type-Options "nosniff" always;
-    add_header Referrer-Policy "no-referrer-when-downgrade" always;
-    add_header Content-Security-Policy "default-src 'self' http: https: data: blob: 'unsafe-inline'" always;
-
-    # Gzip compression
-    gzip on;
-    gzip_vary on;
-    gzip_min_length 1024;
-    gzip_proxied expired no-cache no-store private must-revalidate auth;
-    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/javascript;
-
-    # Serve static files
     location / {
-        root /var/www/gnacops/dist;
-        try_files \$uri \$uri/ /index.html;
-        
-        # Cache static assets
-        location ~* \.(js|css|png|jpg|jpeg|gif|ico|svg)$ {
-            expires 1y;
-            add_header Cache-Control "public, immutable";
-        }
-    }
-
-    # API proxy
-    location /api/ {
         proxy_pass http://localhost:5000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade \$http_upgrade;
@@ -162,69 +114,42 @@ server {
         proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto \$scheme;
         proxy_cache_bypass \$http_upgrade;
-        proxy_read_timeout 86400;
-    }
-
-    # Health check
-    location /health {
-        proxy_pass http://localhost:5000/api/health;
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
     }
 }
 EOF
 
 # Enable the site
-sudo ln -sf /etc/nginx/sites-available/gnacops /etc/nginx/sites-enabled/
-sudo rm -f /etc/nginx/sites-enabled/default
-
-# Test Nginx configuration
+sudo ln -sf /etc/nginx/sites-available/gnacops-marketplace /etc/nginx/sites-enabled/
 sudo nginx -t
+sudo systemctl restart nginx
 
-# Start the application with PM2
-print_status "Starting application with PM2..."
-pm2 start ecosystem.config.js
+# Configure PM2
+print_status "Configuring PM2..."
+pm2 start npm --name "gnacops-marketplace" -- start
 pm2 save
 pm2 startup
 
 # Configure firewall
 print_status "Configuring firewall..."
-sudo ufw allow 'Nginx Full'
-sudo ufw allow OpenSSH
+sudo ufw allow 22
+sudo ufw allow 80
+sudo ufw allow 443
 sudo ufw --force enable
 
-# Create SSL certificate (optional - requires certbot)
-print_status "Setting up SSL certificate..."
-if command -v certbot &> /dev/null; then
-    sudo certbot --nginx -d your-domain.com -d www.your-domain.com
-else
-    print_warning "Certbot not found. Please install it to enable SSL:"
-    print_warning "sudo apt install certbot python3-certbot-nginx"
-fi
-
-# Restart Nginx
-sudo systemctl restart nginx
-
-# Create systemd service for PM2
-print_status "Creating systemd service..."
-pm2 startup systemd -u $USER --hp /home/$USER
+# Install SSL certificate (optional)
+print_status "Installing SSL certificate..."
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d your-domain.com
 
 print_status "Deployment completed successfully!"
+print_status "Your application should be available at: http://your-domain.com"
+print_warning "Don't forget to:"
+print_warning "1. Edit the .env file with your configuration"
+print_warning "2. Update the domain name in Nginx configuration"
+print_warning "3. Set up your Paystack API keys"
+print_warning "4. Configure your database credentials"
+
 echo ""
-print_status "Next steps:"
-echo "1. Edit the .env file with your configuration"
-echo "2. Update the domain name in Nginx configuration"
-echo "3. Configure your Paystack API keys"
-echo "4. Set up SSL certificate with Let's Encrypt"
-echo "5. Change the default admin password"
-echo ""
-print_status "Default admin credentials:"
-echo "Email: admin@gnacops.org"
-echo "Password: admin123"
-echo ""
-print_status "Application URLs:"
-echo "Frontend: http://your-domain.com"
-echo "API: http://your-domain.com/api"
-echo "Health Check: http://your-domain.com/health" 
+print_status "To start the application: pm2 start gnacops-marketplace"
+print_status "To view logs: pm2 logs gnacops-marketplace"
+print_status "To restart: pm2 restart gnacops-marketplace" 

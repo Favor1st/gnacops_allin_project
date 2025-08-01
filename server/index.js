@@ -14,7 +14,7 @@ import adminRoutes from './routes/admin.js';
 import paymentRoutes from './routes/payments.js';
 import vendorRoutes from './routes/vendors.js';
 import settingsRoutes from './routes/settings.js';
-import installerRoutes from './routes/installer.js';
+
 
 // Import database connection
 import { sequelize } from './database/config.js';
@@ -67,7 +67,7 @@ app.use('/api/admin', adminRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/settings', settingsRoutes);
-app.use('/api/installer', installerRoutes);
+
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
