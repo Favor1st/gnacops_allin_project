@@ -17,6 +17,8 @@ import settingsRoutes from './routes/settings.js';
 import installerRoutes from './routes/installer-routes.js';
 import membersRoutes from './routes/members.js';
 import applicationsRoutes from './routes/applications.js';
+import formsRoutes from './routes/forms.js';
+import certificatesRoutes from './routes/certificates.js';
 
 // Import database connection
 import { sequelize } from './database/config.js';
@@ -78,6 +80,8 @@ app.use('/api/settings', settingsRoutes);
 app.use('/api/installer', installerRoutes);
 app.use('/api/members', membersRoutes);
 app.use('/api/applications', applicationsRoutes);
+app.use('/api/forms', formsRoutes);
+app.use('/api/certificates', certificatesRoutes);
 // Serve installer
 app.get('/installer', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/installer.html'));

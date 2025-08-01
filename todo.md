@@ -1,3 +1,10 @@
+# Cursor Task Implementation Documentation
+
+**Project:** Narcos Platform
+**Environment:** Cursor IDE (GitHub Clone)
+**Stage:** Post-UI Development / Backend Functional Integration
+
+---
 
 ## Overview
 
@@ -94,8 +101,53 @@ This document outlines the technical tasks for Cursor to implement and complete 
   * Add components like **Logo**, **User Name**, **Signature**, **QR Code**, **Award Title**, **Date**
   * Font selection, spacing, and color options
   * Preview mode before saving
-* Allow saving and reusing templates for different programs.
-* Generated certificates should inherit saved templates and merge user data dynamically.
+
+#### 📄 Example Template Structure (Based on Josan Blooming School PDF)
+
+```html
+<div class="certificate-container" style="width: 1000px; padding: 60px; border: 10px solid #000; text-align: center; font-family: 'Georgia', serif;">
+  <h1 style="font-size: 36px; margin-bottom: 40px;">{{ school_name }}</h1>
+
+  <div style="font-size: 22px; margin: 30px 0;">
+    <strong>Membership ID:</strong> {{ membership_id }}
+  </div>
+
+  <div style="font-size: 20px; margin-bottom: 30px;">
+    <strong>Date of Issuance:</strong> {{ issuance_date }}
+  </div>
+
+  <div style="font-size: 18px; margin-bottom: 10px;">
+    <strong>Validity:</strong> Valid for {{ validity_period }}
+  </div>
+
+  <div style="position: absolute; bottom: 60px; left: 60px;">
+    <img src="{{ signature_url }}" alt="Signature" height="60px">
+    <p style="margin: 0;">Authorized Signature</p>
+  </div>
+
+  <div style="position: absolute; bottom: 60px; right: 60px;">
+    <img src="{{ logo_url }}" alt="Logo" height="80px">
+  </div>
+</div>
+```
+
+#### 🔑 Template Fields Required
+
+| Field Name       | Key (Variable)    | Type         | Example                         |
+| ---------------- | ----------------- | ------------ | ------------------------------- |
+| School Name      | `school_name`     | String       | Josan Blooming Community School |
+| Membership ID    | `membership_id`   | String       | CG12N/25/7501/AR                |
+| Date of Issuance | `issuance_date`   | Date         | 29th April, 2025                |
+| Validity Period  | `validity_period` | String       | 1 year                          |
+| Logo             | `logo_url`        | Image Upload | /assets/logos/gnacops.png       |
+| Signature        | `signature_url`   | Image Upload | /assets/signatures/director.png |
+
+#### 🛠 Integration Notes for Cursor
+
+* Store templates as HTML with handlebars-style variables.
+* Backend should replace variables with user data.
+* Render final certificate as HTML and export to PDF.
+* Allow send via email or download.
 * Store templates and allow updating by Super Admin or Admin Workers.
 * Create certificate preview modal/page.
 * Implement download button (PDF certificate export).
@@ -123,3 +175,9 @@ This document outlines the technical tasks for Cursor to implement and complete 
 3. Create missing views and components
 4. Connect all buttons to logic and backend actions
 5. Test flow for each user role
+
+---
+
+**Maintained By:** Narcos Engineering Lead
+**Version:** 1.0.0
+**Last Updated:** August 1, 2025

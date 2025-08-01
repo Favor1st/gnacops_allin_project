@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -10,87 +10,211 @@ import { Award, Download, Send, Eye, Filter } from "lucide-react";
 
 const AdminCertificates = () => {
   const { toast } = useToast();
-  const [certificates, setCertificates] = useState([
-    {
-      id: 1,
-      memberName: "John Doe",
-      memberEmail: "john@example.com",
-      certificateType: "Full Membership",
-      issueDate: "2024-01-15",
-      status: "issued",
-      validUntil: "2025-01-15",
-      certificateNumber: "GNACOPS-001-2024"
-    },
-    {
-      id: 2,
-      memberName: "Jane Smith",
-      memberEmail: "jane@example.com",
-      certificateType: "Associate Membership",
-      issueDate: "2024-01-10",
-      status: "pending",
-      validUntil: "2025-01-10",
-      certificateNumber: "GNACOPS-002-2024"
-    },
-    {
-      id: 3,
-      memberName: "Robert Johnson",
-      memberEmail: "robert@example.com",
-      certificateType: "Student Membership",
-      issueDate: "2024-01-20",
-      status: "revoked",
-      validUntil: "2025-01-20",
-      certificateNumber: "GNACOPS-003-2024"
-    }
-  ]);
+  const [certificates, setCertificates] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  });
 
   const [filter, setFilter] = useState("all");
 
-  const handleIssueCertificate = (id: number) => {
-    setCertificates(certificates.map(cert => 
-      cert.id === id 
-        ? { ...cert, status: "issued", issueDate: new Date().toISOString().split('T')[0] }
-        : cert
-    ));
-    toast({
-      title: "Success",
-      description: "Certificate issued successfully",
-    });
+  // Fetch certificates from API
+  useEffect(() => {
+    fetchCertificates();
+  }, [pagination.currentPage, filter]);
+
+  const fetchCertificates = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const params = new URLSearchParams({
+        page: pagination.currentPage,
+        limit: pagination.itemsPerPage,
+        status: filter
+      });
+
+      const response = await fetch(`/api/certificates?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setCertificates(data.certificates);
+        setPagination(data.pagination);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch certificates",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching certificates:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch certificates",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRevokeCertificate = (id: number) => {
-    setCertificates(certificates.map(cert => 
-      cert.id === id 
-        ? { ...cert, status: "revoked" }
-        : cert
-    ));
-    toast({
-      title: "Success",
-      description: "Certificate revoked successfully",
-    });
+  const handleIssueCertificate = async (id: number) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/certificates/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'active' })
+      });
+
+      if (response.ok) {
+        fetchCertificates(); // Refresh the list
+        toast({
+          title: "Success",
+          description: "Certificate issued successfully",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to issue certificate",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to issue certificate",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDownloadCertificate = (memberName: string, certificateNumber: string) => {
-    toast({
-      title: "Download Started",
-      description: `Downloading certificate for ${memberName} (${certificateNumber})`,
-    });
-    // In a real app, this would trigger a PDF download
+  const handleRevokeCertificate = async (id: number) => {
+    const reason = prompt('Please provide a reason for revocation:');
+    if (!reason) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/certificates/${id}/revoke`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ revocationReason: reason })
+      });
+
+      if (response.ok) {
+        fetchCertificates(); // Refresh the list
+        toast({
+          title: "Success",
+          description: "Certificate revoked successfully",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to revoke certificate",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to revoke certificate",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleEmailCertificate = (memberName: string, email: string, certificateNumber: string) => {
-    toast({
-      title: "Email Sent",
-      description: `Certificate for ${memberName} (${certificateNumber}) has been sent to ${email}`,
-    });
-    // In a real app, this would send an email with the certificate attached
+  const handleDownloadCertificate = async (id: number, memberName: string, certificateNumber: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/certificates/${id}/download`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${certificateNumber}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        toast({
+          title: "Download Successful",
+          description: "Certificate downloaded successfully",
+        });
+      } else {
+        toast({
+          title: "Download Failed",
+          description: "Failed to download certificate",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Download Failed",
+        description: "Failed to download certificate",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleViewCertificate = (memberName: string, certificateNumber: string) => {
-    toast({
-      title: "Viewing Certificate",
-      description: `Opening certificate preview for ${memberName} (${certificateNumber})`,
-    });
-    // In a real app, this would open a modal or navigate to a preview page
+  const handleEmailCertificate = async (id: number, memberName: string, email: string, certificateNumber: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/certificates/${id}/email`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Email Sent",
+          description: `Certificate for ${memberName} (${certificateNumber}) has been sent to ${email}`,
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to send certificate email",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send certificate email",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleViewCertificate = (id: number, memberName: string, certificateNumber: string) => {
+    // Navigate to certificate preview page
+    window.open(`/admin/certificates/${id}`, '_blank');
   };
 
   const handleBulkDownload = () => {

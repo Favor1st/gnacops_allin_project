@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -31,49 +31,14 @@ type Form = {
 
 const AdminFormBuilder = () => {
   const { toast } = useToast();
-  const [forms, setForms] = useState<Form[]>([
-    {
-      id: 1,
-      name: "Membership Application",
-      description: "Standard membership application form",
-      fields: [
-        { id: '1', type: 'text', label: 'Full Name', required: true },
-        { id: '2', type: 'email', label: 'Email Address', required: true },
-        { id: '3', type: 'phone', label: 'Phone Number', required: true },
-        { id: '4', type: 'textarea', label: 'Address', required: true },
-        { id: '5', type: 'select', label: 'Membership Type', required: true, options: ['Individual', 'Corporate', 'Student'] }
-      ],
-      status: "active",
-      submissions: 45,
-      createdAt: "2024-01-15"
-    },
-    {
-      id: 2,
-      name: "Event Registration",
-      description: "Registration form for GNACOPS events",
-      fields: [
-        { id: '1', type: 'text', label: 'Event Name', required: true },
-        { id: '2', type: 'date', label: 'Event Date', required: true },
-        { id: '3', type: 'select', label: 'Attendance Type', required: true, options: ['Virtual', 'In-Person', 'Hybrid'] }
-      ],
-      status: "draft",
-      submissions: 0,
-      createdAt: "2024-01-20"
-    },
-    {
-      id: 3,
-      name: "Complaint Form",
-      description: "Member complaint submission form",
-      fields: [
-        { id: '1', type: 'text', label: 'Subject', required: true },
-        { id: '2', type: 'textarea', label: 'Description', required: true },
-        { id: '3', type: 'select', label: 'Priority', required: true, options: ['Low', 'Medium', 'High'] }
-      ],
-      status: "active",
-      submissions: 12,
-      createdAt: "2024-01-10"
-    }
-  ]);
+  const [forms, setForms] = useState<Form[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  });
 
   const [isCreating, setIsCreating] = useState(false);
   const [editingFormId, setEditingFormId] = useState<number | null>(null);
@@ -88,7 +53,51 @@ const AdminFormBuilder = () => {
     required: false
   });
 
-  const handleCreateForm = () => {
+  // Fetch forms from API
+  useEffect(() => {
+    fetchForms();
+  }, [pagination.currentPage]);
+
+  const fetchForms = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const params = new URLSearchParams({
+        page: pagination.currentPage,
+        limit: pagination.itemsPerPage
+      });
+
+      const response = await fetch(`/api/forms?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setForms(data.forms);
+        setPagination(data.pagination);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch forms",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching forms:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch forms",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateForm = async () => {
     if (!newForm.name || !newForm.description || !newForm.type) {
       toast({
         title: "Error",
@@ -98,32 +107,84 @@ const AdminFormBuilder = () => {
       return;
     }
 
-    const form: Form = {
-      id: forms.length + 1,
-      name: newForm.name,
-      description: newForm.description,
-      fields: [],
-      status: "draft",
-      submissions: 0,
-      createdAt: new Date().toISOString().split('T')[0]
-    };
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/forms', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          title: newForm.name,
+          description: newForm.description,
+          type: newForm.type,
+          fields: []
+        })
+      });
 
-    setForms([...forms, form]);
-    setNewForm({ name: "", description: "", type: "" });
-    setIsCreating(false);
-
-    toast({
-      title: "Success",
-      description: "Form created successfully",
-    });
+      if (response.ok) {
+        const data = await response.json();
+        setNewForm({ name: "", description: "", type: "" });
+        setIsCreating(false);
+        fetchForms(); // Refresh the list
+        toast({
+          title: "Success",
+          description: "Form created successfully",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to create form",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create form",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleDeleteForm = (id: number) => {
-    setForms(forms.filter(form => form.id !== id));
-    toast({
-      title: "Success",
-      description: "Form deleted successfully",
-    });
+  const handleDeleteForm = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this form?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/forms/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        fetchForms(); // Refresh the list
+        toast({
+          title: "Success",
+          description: "Form deleted successfully",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to delete form",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete form",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleToggleStatus = (id: number) => {
@@ -152,18 +213,81 @@ const AdminFormBuilder = () => {
     });
   };
 
-  const handleShareForm = (id: number, name: string) => {
-    toast({
-      title: "Share Form",
-      description: `Preparing ${name} for sharing`,
-    });
+  const handleShareForm = async (id: number, name: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/forms/${id}/share`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ isPublic: true })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Copy to clipboard
+        navigator.clipboard.writeText(data.shareUrl);
+        toast({
+          title: "Share Link Generated",
+          description: "Share link copied to clipboard",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to generate share link",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to generate share link",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleExportForm = (id: number, name: string) => {
-    toast({
-      title: "Export Form",
-      description: `Exporting ${name} as JSON`,
-    });
+  const handleExportForm = async (id: number, name: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/forms/${id}/export/json`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        toast({
+          title: "Export Successful",
+          description: "Form exported as JSON",
+        });
+      } else {
+        toast({
+          title: "Export Failed",
+          description: "Failed to export form",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export form",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusBadge = (status: string) => {
