@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GNACOPS Marketplace - Installer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .installer-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .step h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-right: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-bar {
+            background: #e1e5e9;
+            height: 6px;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .checklist {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .checklist-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: white;
+        }
+
+        .check-icon.success {
+            background: #28a745;
+        }
+
+        .check-icon.error {
+            background: #dc3545;
+        }
+
+        .check-icon.pending {
+            background: #ffc107;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="installer-container">
+        <div class="header">
+            <h1>🚀 GNACOPS Marketplace</h1>
+            <p>Welcome to the installation wizard</p>
+        </div>
+
+        <div class="content">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress"></div>
+            </div>
+
+            <!-- Step 1: Welcome -->
+            <div class="step active" id="step1">
+                <h2>Welcome to GNACOPS Marketplace</h2>
+                <p style="margin-bottom: 20px; color: #666;">
+                    This installer will help you set up your marketplace application. 
+                    Please make sure you have the following ready:
+                </p>
+                
+                <div class="checklist">
+                    <div class="checklist-item">
+                        <div class="check-icon success">✓</div>
+                        <span>Database credentials (MySQL/MariaDB)</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon success">✓</div>
+                        <span>Paystack API keys (for payments)</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon success">✓</div>
+                        <span>Email configuration (optional)</span>
+                    </div>
+                </div>
+
+                <button class="btn" onclick="nextStep()">Start Installation</button>
+            </div>
+
+            <!-- Step 2: System Check -->
+            <div class="step" id="step2">
+                <h2>System Requirements Check</h2>
+                <div id="system-checks">
+                    <div class="checklist-item">
+                        <div class="check-icon pending" id="node-check">⏳</div>
+                        <span>Node.js version</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon pending" id="npm-check">⏳</div>
+                        <span>NPM packages</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon pending" id="db-check">⏳</div>
+                        <span>Database connection</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon pending" id="write-check">⏳</div>
+                        <span>File permissions</span>
+                    </div>
+                </div>
+
+                <div class="status info" id="check-status">
+                    Running system checks...
+                </div>
+
+                <button class="btn" onclick="runSystemChecks()" id="check-btn">Run System Checks</button>
+                <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+            </div>
+
+            <!-- Step 3: Database Configuration -->
+            <div class="step" id="step3">
+                <h2>Database Configuration</h2>
+                <div class="form-group">
+                    <label for="db-host">Database Host</label>
+                    <input type="text" id="db-host" value="localhost" placeholder="localhost">
+                </div>
+                <div class="form-group">
+                    <label for="db-port">Database Port</label>
+                    <input type="text" id="db-port" value="3306" placeholder="3306">
+                </div>
+                <div class="form-group">
+                    <label for="db-name">Database Name</label>
+                    <input type="text" id="db-name" value="gnacops_db" placeholder="gnacops_db">
+                </div>
+                <div class="form-group">
+                    <label for="db-user">Database Username</label>
+                    <input type="text" id="db-user" placeholder="Enter database username">
+                </div>
+                <div class="form-group">
+                    <label for="db-password">Database Password</label>
+                    <input type="password" id="db-password" placeholder="Enter database password">
+                </div>
+
+                <div class="status" id="db-status"></div>
+
+                <button class="btn" onclick="testDatabase()">Test Connection</button>
+                <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                <button class="btn" onclick="nextStep()" id="db-next" disabled>Continue</button>
+            </div>
+
+            <!-- Step 4: Paystack Configuration -->
+            <div class="step" id="step4">
+                <h2>Paystack Payment Gateway</h2>
+                <div class="form-group">
+                    <label for="paystack-secret">Paystack Secret Key</label>
+                    <input type="text" id="paystack-secret" placeholder="sk_test_... or sk_live_...">
+                </div>
+                <div class="form-group">
+                    <label for="paystack-public">Paystack Public Key</label>
+                    <input type="text" id="paystack-public" placeholder="pk_test_... or pk_live_...">
+                </div>
+                <div class="form-group">
+                    <label for="paystack-webhook">Webhook Secret (Optional)</label>
+                    <input type="text" id="paystack-webhook" placeholder="Enter webhook secret">
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="paystack-test-mode" checked>
+                        Test Mode (uncheck for production)
+                    </label>
+                </div>
+
+                <div class="status" id="paystack-status"></div>
+
+                <button class="btn" onclick="testPaystack()">Test Paystack</button>
+                <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                <button class="btn" onclick="nextStep()">Continue</button>
+            </div>
+
+            <!-- Step 5: Admin Account -->
+            <div class="step" id="step5">
+                <h2>Admin Account Setup</h2>
+                <div class="form-group">
+                    <label for="admin-email">Admin Email</label>
+                    <input type="email" id="admin-email" placeholder="admin@yourdomain.com">
+                </div>
+                <div class="form-group">
+                    <label for="admin-password">Admin Password</label>
+                    <input type="password" id="admin-password" placeholder="Enter secure password">
+                </div>
+                <div class="form-group">
+                    <label for="admin-name">Admin Name</label>
+                    <input type="text" id="admin-name" placeholder="Enter admin name">
+                </div>
+
+                <button class="btn btn-secondary" onclick="prevStep()">Back</button>
+                <button class="btn" onclick="nextStep()">Continue</button>
+            </div>
+
+            <!-- Step 6: Installation -->
+            <div class="step" id="step6">
+                <h2>Installation Progress</h2>
+                <div id="installation-progress">
+                    <div class="checklist-item">
+                        <div class="check-icon pending" id="install-db">⏳</div>
+                        <span>Creating database tables</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon pending" id="install-config">⏳</div>
+                        <span>Writing configuration files</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon pending" id="install-admin">⏳</div>
+                        <span>Creating admin account</span>
+                    </div>
+                    <div class="checklist-item">
+                        <div class="check-icon pending" id="install-complete">⏳</div>
+                        <span>Finalizing installation</span>
+                    </div>
+                </div>
+
+                <div class="status" id="install-status"></div>
+
+                <button class="btn" onclick="startInstallation()" id="install-btn">Start Installation</button>
+                <button class="btn btn-secondary" onclick="prevStep()" id="install-back">Back</button>
+            </div>
+
+            <!-- Step 7: Complete -->
+            <div class="step" id="step7">
+                <h2>🎉 Installation Complete!</h2>
+                <div class="status success">
+                    Your GNACOPS Marketplace has been successfully installed!
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                    <h3>Next Steps:</h3>
+                    <ul style="margin-left: 20px; margin-top: 10px;">
+                        <li>Visit your admin dashboard to configure settings</li>
+                        <li>Set up your Paystack webhook URL</li>
+                        <li>Configure your email settings</li>
+                        <li>Start adding products and managing your marketplace</li>
+                    </ul>
+                </div>
+
+                <button class="btn" onclick="goToAdmin()">Go to Admin Dashboard</button>
+                <button class="btn btn-secondary" onclick="goToHome()">Go to Homepage</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 7;
+
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+
+        function showStep(step) {
+            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
+            updateProgress();
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+
+        function showStatus(elementId, message, type) {
+            const status = document.getElementById(elementId);
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+        }
+
+        function updateCheckIcon(elementId, status) {
+            const icon = document.getElementById(elementId);
+            icon.className = `check-icon ${status}`;
+            icon.textContent = status === 'success' ? '✓' : status === 'error' ? '✗' : '⏳';
+        }
+
+        async function runSystemChecks() {
+            const checkBtn = document.getElementById('check-btn');
+            checkBtn.disabled = true;
+            checkBtn.textContent = 'Checking...';
+
+            showStatus('check-status', 'Running system checks...', 'info');
+
+            try {
+                const response = await fetch('/api/installer/system-checks');
+                const data = await response.json();
+
+                if (data.success) {
+                    updateCheckIcon('node-check', 'success');
+                    updateCheckIcon('npm-check', 'success');
+                    updateCheckIcon('db-check', data.checks.databaseConnection ? 'success' : 'error');
+                    updateCheckIcon('write-check', 'success');
+                    
+                    showStatus('check-status', 'System checks completed successfully', 'success');
+                    checkBtn.textContent = 'All Checks Passed!';
+                } else {
+                    showStatus('check-status', 'System checks failed: ' + data.error, 'error');
+                    checkBtn.textContent = 'Retry Checks';
+                }
+            } catch (error) {
+                showStatus('check-status', 'Failed to run system checks: ' + error.message, 'error');
+                checkBtn.textContent = 'Retry Checks';
+            }
+            
+            checkBtn.disabled = false;
+        }
+
+        async function testDatabase() {
+            const dbStatus = document.getElementById('db-status');
+            const dbNext = document.getElementById('db-next');
+            
+            const host = document.getElementById('db-host').value;
+            const port = document.getElementById('db-port').value;
+            const database = document.getElementById('db-name').value;
+            const username = document.getElementById('db-user').value;
+            const password = document.getElementById('db-password').value;
+            
+            showStatus('db-status', 'Testing database connection...', 'info');
+
+            try {
+                const response = await fetch('/api/installer/test-database', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        host,
+                        port,
+                        database,
+                        username,
+                        password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus('db-status', 'Database connection successful!', 'success');
+                    dbNext.disabled = false;
+                } else {
+                    showStatus('db-status', 'Database connection failed: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('db-status', 'Failed to test database: ' + error.message, 'error');
+            }
+        }
+
+        async function testPaystack() {
+            const paystackStatus = document.getElementById('paystack-status');
+            
+            const secretKey = document.getElementById('paystack-secret').value;
+            const publicKey = document.getElementById('paystack-public').value;
+            
+            showStatus('paystack-status', 'Testing Paystack connection...', 'info');
+
+            try {
+                const response = await fetch('/api/installer/test-paystack', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        secretKey,
+                        publicKey
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showStatus('paystack-status', 'Paystack connection successful!', 'success');
+                } else {
+                    showStatus('paystack-status', 'Paystack connection failed: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showStatus('paystack-status', 'Failed to test Paystack: ' + error.message, 'error');
+            }
+        }
+
+        async function startInstallation() {
+            const installBtn = document.getElementById('install-btn');
+            const installBack = document.getElementById('install-back');
+            
+            installBtn.disabled = true;
+            installBtn.textContent = 'Installing...';
+            installBack.disabled = true;
+
+            showStatus('install-status', 'Starting installation...', 'info');
+
+            // Collect all form data
+            const database = {
+                host: document.getElementById('db-host').value,
+                port: document.getElementById('db-port').value,
+                database: document.getElementById('db-name').value,
+                username: document.getElementById('db-user').value,
+                password: document.getElementById('db-password').value
+            };
+
+            const paystack = {
+                secretKey: document.getElementById('paystack-secret').value,
+                publicKey: document.getElementById('paystack-public').value,
+                webhookSecret: document.getElementById('paystack-webhook').value,
+                testMode: document.getElementById('paystack-test-mode').checked
+            };
+
+            const admin = {
+                email: document.getElementById('admin-email').value,
+                password: document.getElementById('admin-password').value,
+                name: document.getElementById('admin-name').value
+            };
+
+            try {
+                const response = await fetch('/api/installer/install', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        database,
+                        paystack,
+                        admin
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    updateCheckIcon('install-db', 'success');
+                    updateCheckIcon('install-config', 'success');
+                    updateCheckIcon('install-admin', 'success');
+                    updateCheckIcon('install-complete', 'success');
+                    showStatus('install-status', 'Installation completed successfully!', 'success');
+                    nextStep();
+                } else {
+                    showStatus('install-status', 'Installation failed: ' + data.error, 'error');
+                    installBtn.textContent = 'Retry Installation';
+                    installBtn.disabled = false;
+                    installBack.disabled = false;
+                }
+            } catch (error) {
+                showStatus('install-status', 'Installation failed: ' + error.message, 'error');
+                installBtn.textContent = 'Retry Installation';
+                installBtn.disabled = false;
+                installBack.disabled = false;
+            }
+        }
+
+        function goToAdmin() {
+            window.location.href = '/admin';
+        }
+
+        function goToHome() {
+            window.location.href = '/';
+        }
+
+        // Initialize
+        updateProgress();
+    </script>
+</body>
+</html> 

@@ -80,8 +80,8 @@ A comprehensive marketplace application for the Ghana National Association of Co
 
 6. **Start development server**
    ```bash
-   npm run dev
-   ```
+npm run dev
+```
 
 7. **Start backend server**
    ```bash
