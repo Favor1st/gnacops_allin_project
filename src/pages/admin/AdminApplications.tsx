@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,57 +19,60 @@ const AdminApplications = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [applications, setApplications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  });
 
-  const applications = [
-    {
-      id: "REG-2024-001",
-      name: "Dr. Kwame Asante",
-      email: "kwame.asante@email.com",
-      type: "Teacher Council",
-      submittedAt: "2024-01-25 14:30",
-      status: "pending",
-      region: "Greater Accra",
-      documentsSubmitted: 5,
-      documentsRequired: 5,
-      priority: "high"
-    },
-    {
-      id: "REG-2024-002", 
-      name: "Mary Adjei",
-      email: "mary.adjei@email.com",
-      type: "Parent Council",
-      submittedAt: "2024-01-25 13:15",
-      status: "approved",
-      region: "Ashanti",
-      documentsSubmitted: 4,
-      documentsRequired: 4,
-      priority: "normal"
-    },
-    {
-      id: "REG-2024-003",
-      name: "Accra Private Academy",
-      email: "admin@accraprivate.edu.gh",
-      type: "Institutional",
-      submittedAt: "2024-01-25 11:45",
-      status: "under_review",
-      region: "Greater Accra",
-      documentsSubmitted: 7,
-      documentsRequired: 8,
-      priority: "high"
-    },
-    {
-      id: "REG-2024-004",
-      name: "John Mensah",
-      email: "john.mensah@email.com",
-      type: "Proprietor",
-      submittedAt: "2024-01-25 10:20",
-      status: "rejected",
-      region: "Central",
-      documentsSubmitted: 3,
-      documentsRequired: 6,
-      priority: "low"
+  // Fetch applications from API
+  useEffect(() => {
+    fetchApplications();
+  }, [pagination.currentPage, searchTerm, filterStatus]);
+
+  const fetchApplications = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const params = new URLSearchParams({
+        page: pagination.currentPage,
+        limit: pagination.itemsPerPage,
+        search: searchTerm,
+        status: filterStatus
+      });
+
+      const response = await fetch(`/api/applications?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setApplications(data.applications);
+        setPagination(data.pagination);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch applications",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching applications:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch applications",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -99,58 +102,204 @@ const AdminApplications = () => {
     }
   };
 
-  const handleApprove = (id: string) => {
-    toast({
-      title: "Application Approved",
-      description: `Application ${id} has been approved and certificate will be generated.`,
-    });
+  const handleApprove = async (id: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/applications/${id}/approve`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reviewNotes: 'Application approved' })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Application Approved",
+          description: "Application has been approved successfully.",
+        });
+        fetchApplications(); // Refresh the list
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to approve application",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to approve application",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleReject = (id: string) => {
-    toast({
-      title: "Application Rejected",
-      description: `Application ${id} has been rejected.`,
-      variant: "destructive",
-    });
+  const handleReject = async (id: string) => {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (!reason) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/applications/${id}/reject`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reviewNotes: reason })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Application Rejected",
+          description: "Application has been rejected successfully.",
+          variant: "destructive",
+        });
+        fetchApplications(); // Refresh the list
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to reject application",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to reject application",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleStartReview = (id: string) => {
-    toast({
-      title: "Review Started",
-      description: `Application ${id} is now under review.`,
-    });
+  const handleStartReview = async (id: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/applications/${id}/start-review`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ reviewNotes: 'Review started' })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Review Started",
+          description: "Application is now under review.",
+        });
+        fetchApplications(); // Refresh the list
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to start review",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to start review",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewApplication = (id: string) => {
-    toast({
-      title: "Viewing Application",
-      description: `Opening detailed view for application ${id}.`,
-    });
-    // In a real app, this would navigate to a detailed view page
+    navigate(`/admin/applications/${id}`);
   };
 
-  const handleContactApplicant = (email: string, name: string) => {
-    toast({
-      title: "Contact Initiated",
-      description: `Opening email client to contact ${name} at ${email}.`,
-    });
-    // In a real app, this would open email client or messaging system
+  const handleContactApplicant = async (email: string, name: string) => {
+    const subject = prompt('Email subject:');
+    const message = prompt('Email message:');
+    
+    if (!subject || !message) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/applications/${id}/contact`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ subject, message })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Email Sent",
+          description: "Contact email has been sent successfully.",
+        });
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to send email",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send email",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleExportAll = () => {
-    toast({
-      title: "Export Started",
-      description: "Preparing application data for export...",
-    });
-    // In a real app, this would trigger a download
+  const handleExportAll = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const params = new URLSearchParams({
+        status: filterStatus
+      });
+
+      const response = await fetch(`/api/applications/export/csv?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `applications_export_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        toast({
+          title: "Export Successful",
+          description: "Application data has been exported to CSV.",
+        });
+      } else {
+        toast({
+          title: "Export Failed",
+          description: "Failed to export application data.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export application data.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const filteredApplications = applications.filter(application => {
-    const matchesSearch = application.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         application.id.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filterStatus === "all" || application.status === filterStatus;
-    return matchesSearch && matchesFilter;
-  });
+  // Filter applications based on search term (server-side filtering is already applied)
+  const filteredApplications = applications;
 
   return (
     <div className="space-y-6">
@@ -247,91 +396,95 @@ const AdminApplications = () => {
 
           {/* Applications List */}
           <div className="space-y-4">
-            {filteredApplications.map((application) => (
-              <div key={application.id} className="border rounded-lg p-4 hover:bg-muted/50">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center space-x-3">
-                      <h4 className="font-semibold">{application.name}</h4>
-                      {getStatusBadge(application.status)}
-                      {getPriorityBadge(application.priority)}
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
-                      <span>ID: {application.id}</span>
-                      <span>Type: {application.type}</span>
-                      <span>Region: {application.region}</span>
-                      <span>Submitted: {application.submittedAt}</span>
-                      <span className="md:col-span-2">Email: {application.email}</span>
-                      <span className="md:col-span-2">
-                        Documents: {application.documentsSubmitted}/{application.documentsRequired}
-                        {application.documentsSubmitted < application.documentsRequired && 
-                          <span className="text-ghana-red"> (Incomplete)</span>
-                        }
-                      </span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex flex-col space-y-2 ml-4">
-                    <div className="flex space-x-2">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleViewApplication(application.id)}
-                      >
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleContactApplicant(application.email, application.name)}
-                      >
-                        <MessageSquare className="w-4 h-4 mr-1" />
-                        Contact
-                      </Button>
-                    </div>
-                    {application.status === "pending" && (
-                      <div className="flex space-x-2">
-                        <Button 
-                          size="sm" 
-                          className="bg-blue-500 hover:bg-blue-600 text-white"
-                          onClick={() => handleStartReview(application.id)}
-                        >
-                          Start Review
-                        </Button>
+            {loading ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Loading applications...</p>
+              </div>
+            ) : filteredApplications.length > 0 ? (
+              filteredApplications.map((application) => (
+                <div key={application.id} className="border rounded-lg p-4 hover:bg-muted/50">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center space-x-3">
+                        <h4 className="font-semibold">{`${application.applicant?.firstName} ${application.applicant?.lastName}`}</h4>
+                        {getStatusBadge(application.status)}
+                        {getPriorityBadge(application.priority)}
                       </div>
-                    )}
-                    {application.status === "under_review" && (
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
+                        <span>ID: {application.applicationNumber}</span>
+                        <span>Type: {application.type}</span>
+                        <span>Region: {application.region}</span>
+                        <span>Submitted: {new Date(application.submittedAt).toLocaleDateString()}</span>
+                        <span className="md:col-span-2">Email: {application.applicant?.email}</span>
+                        <span className="md:col-span-2">
+                          Documents: {application.documentsSubmitted}/{application.documentsRequired}
+                          {application.documentsSubmitted < application.documentsRequired && 
+                            <span className="text-ghana-red"> (Incomplete)</span>
+                          }
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-col space-y-2 ml-4">
                       <div className="flex space-x-2">
                         <Button 
-                          size="sm" 
-                          className="bg-ghana-green hover:bg-ghana-green/90 text-white"
-                          onClick={() => handleApprove(application.id)}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Approve
-                        </Button>
-                        <Button 
-                          variant="destructive" 
+                          variant="outline" 
                           size="sm"
-                          onClick={() => handleReject(application.id)}
+                          onClick={() => handleViewApplication(application.id)}
                         >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Reject
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleContactApplicant(application.applicant?.email, `${application.applicant?.firstName} ${application.applicant?.lastName}`)}
+                        >
+                          <MessageSquare className="w-4 h-4 mr-1" />
+                          Contact
                         </Button>
                       </div>
-                    )}
+                      {application.status === "pending" && (
+                        <div className="flex space-x-2">
+                          <Button 
+                            size="sm" 
+                            className="bg-blue-500 hover:bg-blue-600 text-white"
+                            onClick={() => handleStartReview(application.id)}
+                          >
+                            Start Review
+                          </Button>
+                        </div>
+                      )}
+                      {application.status === "under_review" && (
+                        <div className="flex space-x-2">
+                          <Button 
+                            size="sm" 
+                            className="bg-ghana-green hover:bg-ghana-green/90 text-white"
+                            onClick={() => handleApprove(application.id)}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-1" />
+                            Approve
+                          </Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => handleReject(application.id)}
+                          >
+                            <XCircle className="w-4 h-4 mr-1" />
+                            Reject
+                          </Button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No applications found matching your criteria.</p>
               </div>
-            ))}
+            )}
           </div>
-
-          {filteredApplications.length === 0 && (
-            <div className="text-center py-8">
-              <p className="text-muted-foreground">No applications found matching your criteria.</p>
-            </div>
-          )}
         </CardContent>
       </Card>
     </div>

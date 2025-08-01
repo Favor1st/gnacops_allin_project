@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -23,53 +23,61 @@ const AdminMembers = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterType, setFilterType] = useState("all");
+  const [members, setMembers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 10
+  });
 
-  const members = [
-    {
-      id: "TC-2024-0123",
-      name: "Dr. Kwame Asante",
-      email: "kwame.asante@email.com",
-      type: "Teacher Council",
-      status: "active",
-      region: "Greater Accra",
-      registrationDate: "2024-01-15",
-      expiryDate: "2024-12-31",
-      paymentStatus: "paid"
-    },
-    {
-      id: "PC-2024-0124",
-      name: "Mary Adjei",
-      email: "mary.adjei@email.com", 
-      type: "Parent Council",
-      status: "active",
-      region: "Ashanti",
-      registrationDate: "2024-01-20",
-      expiryDate: "2024-12-31",
-      paymentStatus: "paid"
-    },
-    {
-      id: "IN-2024-0125",
-      name: "Accra Private Academy",
-      email: "admin@accraprivate.edu.gh",
-      type: "Institutional",
-      status: "pending",
-      region: "Greater Accra",
-      registrationDate: "2024-01-25",
-      expiryDate: "2024-12-31",
-      paymentStatus: "pending"
-    },
-    {
-      id: "PR-2024-0126",
-      name: "John Mensah",
-      email: "john.mensah@email.com",
-      type: "Proprietor",
-      status: "suspended",
-      region: "Central",
-      registrationDate: "2024-01-10",
-      expiryDate: "2024-12-31",
-      paymentStatus: "overdue"
+  // Fetch members from API
+  useEffect(() => {
+    fetchMembers();
+  }, [pagination.currentPage, searchTerm, filterStatus, filterType]);
+
+  const fetchMembers = async () => {
+    try {
+      setLoading(true);
+      const token = localStorage.getItem('token');
+      const params = new URLSearchParams({
+        page: pagination.currentPage,
+        limit: pagination.itemsPerPage,
+        search: searchTerm,
+        status: filterStatus,
+        type: filterType
+      });
+
+      const response = await fetch(`/api/members?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMembers(data.members);
+        setPagination(data.pagination);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch members",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching members:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch members",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -99,69 +107,175 @@ const AdminMembers = () => {
     }
   };
 
-  const handleActivate = (id: string) => {
-    toast({
-      title: "Member Activated",
-      description: `Member ${id} has been activated.`,
-    });
+  const handleActivate = async (id: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/members/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'active' })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Member Activated",
+          description: "Member has been activated successfully.",
+        });
+        fetchMembers(); // Refresh the list
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to activate member",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to activate member",
+        variant: "destructive",
+      });
+    }
   };
 
-  const handleSuspend = (id: string) => {
-    toast({
-      title: "Member Suspended",
-      description: `Member ${id} has been suspended.`,
-      variant: "destructive",
-    });
+  const handleSuspend = async (id: string) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/members/${id}/status`, {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: 'suspended' })
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Member Suspended",
+          description: "Member has been suspended successfully.",
+          variant: "destructive",
+        });
+        fetchMembers(); // Refresh the list
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to suspend member",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to suspend member",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleViewMember = (id: string) => {
-    toast({
-      title: "Viewing Member",
-      description: `Opening detailed view for member ${id}.`,
-    });
-    // In a real app, this would navigate to a detailed member view
+    navigate(`/admin/members/${id}`);
   };
 
   const handleEditMember = (id: string) => {
-    toast({
-      title: "Editing Member",
-      description: `Opening edit form for member ${id}.`,
-    });
-    // In a real app, this would open an edit modal or navigate to edit page
+    navigate(`/admin/members/${id}/edit`);
   };
 
-  const handleDeleteMember = (id: string) => {
-    toast({
-      title: "Member Deleted",
-      description: `Member ${id} has been removed from the system.`,
-      variant: "destructive",
-    });
+  const handleDeleteMember = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this member?')) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/members/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        toast({
+          title: "Member Deleted",
+          description: "Member has been deleted successfully.",
+          variant: "destructive",
+        });
+        fetchMembers(); // Refresh the list
+      } else {
+        const error = await response.json();
+        toast({
+          title: "Error",
+          description: error.error || "Failed to delete member",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete member",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleAddMember = () => {
-    toast({
-      title: "Add Member",
-      description: "Opening member registration form.",
-    });
-    // In a real app, this would open a registration form or navigate to add member page
+    navigate('/admin/members/add');
   };
 
-  const handleExportMembers = () => {
-    toast({
-      title: "Export Started",
-      description: "Preparing member data for export...",
-    });
-    // In a real app, this would trigger a download
+  const handleExportMembers = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const params = new URLSearchParams({
+        status: filterStatus,
+        type: filterType
+      });
+
+      const response = await fetch(`/api/members/export/csv?${params}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `members_export_${new Date().toISOString().split('T')[0]}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
+        toast({
+          title: "Export Successful",
+          description: "Member data has been exported to CSV.",
+        });
+      } else {
+        toast({
+          title: "Export Failed",
+          description: "Failed to export member data.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Export Failed",
+        description: "Failed to export member data.",
+        variant: "destructive",
+      });
+    }
   };
 
-  const filteredMembers = members.filter(member => {
-    const matchesSearch = member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         member.email.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === "all" || member.status === filterStatus;
-    const matchesType = filterType === "all" || member.type === filterType;
-    return matchesSearch && matchesStatus && matchesType;
-  });
+  // Filter members based on search term (server-side filtering is already applied)
+  const filteredMembers = members;
 
   return (
     <div className="space-y-6">
@@ -226,66 +340,84 @@ const AdminMembers = () => {
 
           {/* Members List */}
           <div className="space-y-4">
-            {filteredMembers.map((member) => (
-              <div key={member.id} className="border rounded-lg p-4 hover:bg-muted/50">
-                <div className="flex items-center justify-between">
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center space-x-3">
-                      <h4 className="font-semibold">{member.name}</h4>
-                      {getStatusBadge(member.status)}
-                      {getPaymentBadge(member.paymentStatus)}
+            {loading ? (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">Loading members...</p>
+              </div>
+            ) : filteredMembers.length > 0 ? (
+              filteredMembers.map((member) => (
+                <div key={member.id} className="border rounded-lg p-4 hover:bg-muted/50">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 space-y-2">
+                      <div className="flex items-center space-x-3">
+                        <h4 className="font-semibold">{`${member.firstName} ${member.lastName}`}</h4>
+                        {getStatusBadge(member.status)}
+                        {member.payments?.[0] && getPaymentBadge(member.payments[0].status)}
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
+                        <span>ID: {member.membershipNumber || member.id}</span>
+                        <span>Type: {member.membershipType || 'N/A'}</span>
+                        <span>Region: {member.city || 'N/A'}</span>
+                        <span>Email: {member.email}</span>
+                        <span>Phone: {member.phone || 'N/A'}</span>
+                        <span>Registered: {new Date(member.createdAt).toLocaleDateString()}</span>
+                      </div>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
-                      <span>ID: {member.id}</span>
-                      <span>Type: {member.type}</span>
-                      <span>Region: {member.region}</span>
-                      <span>Expires: {member.expiryDate}</span>
-                      <span className="md:col-span-2">Email: {member.email}</span>
-                      <span>Registered: {member.registrationDate}</span>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2 ml-4">
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleViewMember(member.id)}
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleEditMember(member.id)}
-                    >
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    {member.status === "active" && (
+                    
+                    <div className="flex items-center space-x-2 ml-4">
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleSuspend(member.id)}
+                        onClick={() => handleViewMember(member.id)}
                       >
-                        <UserX className="w-4 h-4 mr-1" />
-                        Suspend
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
                       </Button>
-                    )}
-                    {member.status === "suspended" && (
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => handleActivate(member.id)}
+                        onClick={() => handleEditMember(member.id)}
                       >
-                        <UserCheck className="w-4 h-4 mr-1" />
-                        Activate
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
                       </Button>
-                    )}
+                      {member.status === "active" && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleSuspend(member.id)}
+                        >
+                          <UserX className="w-4 h-4 mr-1" />
+                          Suspend
+                        </Button>
+                      )}
+                      {member.status === "suspended" && (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleActivate(member.id)}
+                        >
+                          <UserCheck className="w-4 h-4 mr-1" />
+                          Activate
+                        </Button>
+                      )}
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => handleDeleteMember(member.id)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-muted-foreground">No members found matching your criteria.</p>
               </div>
-            ))}
+            )}
           </div>
 
           {filteredMembers.length === 0 && (

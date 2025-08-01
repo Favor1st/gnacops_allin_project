@@ -15,9 +15,17 @@ import paymentRoutes from './routes/payments.js';
 import vendorRoutes from './routes/vendors.js';
 import settingsRoutes from './routes/settings.js';
 import installerRoutes from './routes/installer-routes.js';
+import membersRoutes from './routes/members.js';
+import applicationsRoutes from './routes/applications.js';
 
 // Import database connection
 import { sequelize } from './database/config.js';
+import { User } from './models/User.js';
+import { Payment } from './models/Payment.js';
+import { Application } from './models/Application.js';
+import { Form } from './models/Form.js';
+import { Certificate } from './models/Certificate.js';
+import { Settings } from './models/Settings.js';
 
 // Load environment variables
 dotenv.config();
@@ -68,6 +76,8 @@ app.use('/api/payments', paymentRoutes);
 app.use('/api/vendors', vendorRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/installer', installerRoutes);
+app.use('/api/members', membersRoutes);
+app.use('/api/applications', applicationsRoutes);
 // Serve installer
 app.get('/installer', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/installer.html'));
