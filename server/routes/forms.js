@@ -3,6 +3,7 @@ import { body, validationResult } from 'express-validator';
 import jwt from 'jsonwebtoken';
 import { Form } from '../models/Form.js';
 import { User } from '../models/User.js';
+import { sequelize } from '../database/config.js';
 import { Parser } from 'json2csv';
 import fs from 'fs';
 import path from 'path';

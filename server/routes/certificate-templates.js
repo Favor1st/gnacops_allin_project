@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import { CertificateTemplate } from '../models/CertificateTemplate.js';
 import { User } from '../models/User.js';
 import { Certificate } from '../models/Certificate.js';
+import { sequelize } from '../database/config.js';
 import { Parser } from 'json2csv';
 import fs from 'fs';
 import path from 'path';
