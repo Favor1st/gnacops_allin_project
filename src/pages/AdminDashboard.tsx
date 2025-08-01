@@ -6,6 +6,7 @@ import AdminMembers from "./admin/AdminMembers";
 import AdminApplications from "./admin/AdminApplications";
 import AdminFormBuilder from "./admin/AdminFormBuilder";
 import AdminCertificates from "./admin/AdminCertificates";
+import CertificateTemplateBuilder from "./admin/CertificateTemplateBuilder";
 import AdminReports from "./admin/AdminReports";
 import AdminWorkers from "./admin/AdminWorkers";
 import AdminSettings from "./admin/AdminSettings";
@@ -38,6 +39,7 @@ const AdminDashboard = () => {
               <Route path="/applications" element={<AdminApplications />} />
               <Route path="/forms" element={<AdminFormBuilder />} />
               <Route path="/certificates" element={<AdminCertificates />} />
+              <Route path="/certificate-templates" element={<CertificateTemplateBuilder />} />
               <Route path="/reports" element={<AdminReports />} />
               <Route path="/workers" element={<AdminWorkers />} />
               <Route path="/settings" element={<AdminSettings />} />

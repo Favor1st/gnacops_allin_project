@@ -19,6 +19,7 @@ import membersRoutes from './routes/members.js';
 import applicationsRoutes from './routes/applications.js';
 import formsRoutes from './routes/forms.js';
 import certificatesRoutes from './routes/certificates.js';
+import certificateTemplatesRoutes from './routes/certificate-templates.js';
 
 // Import database connection
 import { sequelize } from './database/config.js';
@@ -27,6 +28,7 @@ import { Payment } from './models/Payment.js';
 import { Application } from './models/Application.js';
 import { Form } from './models/Form.js';
 import { Certificate } from './models/Certificate.js';
+import { CertificateTemplate } from './models/CertificateTemplate.js';
 import { Settings } from './models/Settings.js';
 
 // Load environment variables
@@ -82,6 +84,7 @@ app.use('/api/members', membersRoutes);
 app.use('/api/applications', applicationsRoutes);
 app.use('/api/forms', formsRoutes);
 app.use('/api/certificates', certificatesRoutes);
+app.use('/api/certificate-templates', certificateTemplatesRoutes);
 // Serve installer
 app.get('/installer', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/installer.html'));

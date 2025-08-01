@@ -33,6 +33,7 @@ const adminMenuItems = [
   { title: "Applications", url: "/admin/applications", icon: ClipboardList },
   { title: "Form Builder", url: "/admin/forms", icon: FileText },
   { title: "Certificates", url: "/admin/certificates", icon: Award },
+  { title: "Template Builder", url: "/admin/certificate-templates", icon: Award },
   { title: "Reports", url: "/admin/reports", icon: BarChart3 },
   { title: "Workers", url: "/admin/workers", icon: UserCog },
   { title: "Settings", url: "/admin/settings", icon: Settings },

@@ -20,10 +20,13 @@ const AdminCertificates = () => {
   });
 
   const [filter, setFilter] = useState("all");
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
 
-  // Fetch certificates from API
+  // Fetch certificates and templates from API
   useEffect(() => {
     fetchCertificates();
+    fetchTemplates();
   }, [pagination.currentPage, filter]);
 
   const fetchCertificates = async () => {
@@ -63,6 +66,36 @@ const AdminCertificates = () => {
       });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchTemplates = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/api/certificate-templates', {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTemplates(data.templates);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to fetch templates",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching templates:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch templates",
+        variant: "destructive"
+      });
     }
   };
 
